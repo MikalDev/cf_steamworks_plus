@@ -1,0 +1,19 @@
+# Ignore node_modules
+node_modules/
+
+# Ignore all files in the dist directory
+/dist/*
+
+# Ignore all files in the export directory
+/export/*
+
+# Ignore all files in the steamworks-sdk directory
+/wrapper-extension/steamworks-sdk/*
+
+/construct-plugin/*.dll
+/construct-plugin/*.exp
+/construct-plugin/*.lib
+/construct-plugin/*.pdb
+
+/wrapper-extension/.vs
+
