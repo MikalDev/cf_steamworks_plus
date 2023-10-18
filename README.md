@@ -1,6 +1,6 @@
 # About
 - Open source repo for the Construct 3 Steam plus addon
-- To just get the addon go to the official C3 addon site
+- To just get the addon go to the official C3 addon site or https://github.com/MikalDev/cf_steamworks_plus/releases
 
 To build the addon and dll (also see #Build below for details on other tools neede)
 
@@ -73,6 +73,9 @@ To build the wrapper extension, you will need:
 - If you want to use the KeepBest method for the leaderboard, create it with the descending score option (if you change it later after you create it, it may not work)
 - Uploading scores is rate limited / throttled, so if you see updates failing to take effect this may be why (learned it the hard way): https://partner.steamgames.com/doc/api/ISteamUserStats#UploadLeaderboardScore
 - The result is returned as a JSON string array which can be parsed by the C3 JSON object.
+
+# Testing
+Use the webiew2 remote viewing option, so you don't to rebuild and export each time. This has been tested with project and adddon (JS) changes, but not changes to the dll (C++).
 
 # Release notes
 - 1.0.0 original release
