@@ -9,10 +9,12 @@
   "description": "To build the addon, run",
   "version": "1.0.0",
   "scripts": {
-    "build": "node build.js",
+    "build-addon": "node build.js",
     "dev": "node dev.js",
     "doc": "node doc.js",
-    "validate": "node validate.js" 
+    "validate": "node validate.js",
+    "build-dll": "node build-dll.js",
+    "build": "node build-dll.js && node build.js"
   },
   "repository": {
     "type": "git",

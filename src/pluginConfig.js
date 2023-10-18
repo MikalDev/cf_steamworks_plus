@@ -36,12 +36,6 @@ module.exports = {
       type: "wrapper-extension",
 			platform: "windows-x64"
     },
-    {
-      filename: "steam_api64.dll", // no need to include "c3runtime/" prefix
-      type: "copy-to-output",
-      fileType: "application/x-msdownload",
-    }
-
   ],
   info: {
     // world only
@@ -112,6 +106,7 @@ module.exports = {
     // follows the format id: langName
     // in the ACEs refer to categories using the id, not the name
     leaderboard: "Leaderboard",
+    general: "General",
   },
   Acts: {
     /*
@@ -250,8 +245,71 @@ module.exports = {
       displayText: "Upload current leaderboard score to [i]{0}[/i]",
       description: "Upload current leaderboard score.",
     },
+    // Download leaderboard scores
+    // Params: leaderboardName, start, end
+    DownloadLeaderboardScores: {
+      category: "leaderboard",
+      forward: "_DownloadLeaderboardScores",
+      autoScriptInterface: true,
+      highlight: false,
+      deprecated: false,
+      isAsync: true,
+
+      params: [
+        {
+          id: "start",
+          name: "Start",
+          desc: "Start position.",
+          type: "number",
+          value: 0,
+        },
+        {
+          id: "end",
+          name: "End",
+          desc: "End position.",
+          type: "number",
+          value: 0,
+        },
+      ],
+      listName: "Download leaderboard scores",
+      displayText: "Download leaderboard scores from [i]{0}[/i] to [i]{1}[/i]",
+      description: "Download leaderboard scores.",
+    },
   },
   Cnds: {
+    OnRequestResult: {
+      // The category of the action as it appears in the add condition dialog
+      category: "general",
+      forward: "_OnRequestResult",
+      autoScriptInterface: true,
+      highlight: false,
+      deprecated: false,
+      isTrigger: true,
+      isFakeTrigger: false,
+      isStatic: false,
+      isLooping: false,
+      isInvertible: true,
+      isCompatibleWithTriggers: false,
+
+      // list of parameters
+      params: [
+        {
+          id: "tag",
+          // The name of the parameter.
+          name: "Tag",
+          // The description of the parameter.
+          desc: "Tag of the request",
+          type: "string",
+          value: "",
+        },
+      ],
+      listName: "OnRequestResult",
+
+      displayText: "On request result [i]{0}[/i]",
+
+      description: "On result of tagged request",
+    }
+  },
     /*
     SampleCondition: {
       // The category of the action as it appears in the add condition dialog
@@ -347,8 +405,26 @@ module.exports = {
       description: "This is a sample condition",
     },
     */
-  },
   Exps: {
+    RequestData: {
+      category: "general",
+      forward: "_RequestData",
+      autoScriptInterface: true,
+      highlight: false,
+      deprecated: false,
+      returnType: "string",
+      isVariadicParameters: false,
+      params: [
+        {
+          id: "tag",
+          name: "Tag",
+          desc: "Tag of the request",
+          type: "string"
+        },
+      ],
+      description: "Return the data from the last request with the tag as JSON string.",
+    },
+  },
     /*
     SampleExpression: {
       // The category of the action as it appears in the expression picker
@@ -406,5 +482,4 @@ module.exports = {
       description: "This is a sample expression",
     },
     */
-  },
 };

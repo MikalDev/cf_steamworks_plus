@@ -17,3 +17,29 @@ node_modules/
 
 /wrapper-extension/.vs
 
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+
+# Local History for Visual Studio Code
+.history/
+
+# Built Visual Studio Code Extensions
+*.vsix
+
+*.tlog
+*.obj
+*.pch
+*.ilk
+
+*.c3addon
+*.vcxproj.user
+/wrapper-extension/steamworks-sdk/
+/wrapper-extension/x64/
+/wrapper-extension/Win32/
+/construct-plugin/*.exp
+/construct-plugin/*.lib
+/construct-plugin/*.pdb

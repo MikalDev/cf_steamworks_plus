@@ -62,7 +62,8 @@ function getFileListFromConfig(config) {
 
   if (config.fileDependencies) {
     config.fileDependencies.forEach(function (file) {
-      files.push(`c3runtime/${file.filename}`);
+      // files.push(`c3runtime/${file.filename}`);
+      files.push(`${file.filename}`);
     });
   }
 
@@ -415,8 +416,6 @@ if (config.icon) {
 }
 
 fs.copyFileSync("./construct-plugin/Steam_x64.ext.dll", "./src/Steam_plus_x64.ext.dll");
-fs.copyFileSync("./construct-plugin/Steam_x64.ext.dll", "./export/Steam_plus_x64.ext.dll");
-fs.copyFileSync("./wrapper-extension/steamworks-sdk/redistributable_bin/win64/steam_api64.dll", "./src/steam_api64.dll");
 
 function getEditorPluginInfoFromConfig(config) {
   const editorPluginInfo = {
@@ -594,7 +593,8 @@ if (config.fileDependencies) {
   config.fileDependencies.forEach((file) => {
     fs.copyFileSync(
       path.join(__dirname, "src", file.filename),
-      path.join(__dirname, "export", "c3runtime", file.filename)
+      path.join(__dirname, "export", file.filename)
+      // path.join(__dirname, "export", "c3runtime", file.filename)
     );
   });
 }

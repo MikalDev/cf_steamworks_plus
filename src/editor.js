@@ -38,7 +38,8 @@ SDK.Plugins[PLUGIN_INFO.id] = class extends SDK.IPluginBase {
       PLUGIN_INFO.fileDependencies.forEach((file) => {
         this._info.AddFileDependency({
           ...file,
-          filename: `c3runtime/${file.filename}`,
+          // filename: `c3runtime/${file.filename}`,
+          filename: `${file.filename}`,
         });
       });
     }

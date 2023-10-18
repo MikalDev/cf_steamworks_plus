@@ -21,15 +21,19 @@ public:
 	void SendAsyncResponse(const std::map<std::string, ExtensionParameter>& params, double asyncId);
 
 	// Handler methods for specific kinds of message
-	void OnInitMessage(const std::string& initAppId, bool isDevelopmentMode, double asyncId);
 	void OnFindLeaderboardMessage(const std::string& name, double asyncId);
     void OnFindLeaderboard(LeaderboardFindResult_t *pCallback, bool bIOFailure);
-    void OnUploadLeaderboardScoreMessage(double score, double asyncId);
+	void OnUploadLeaderboardScoreMessage(int score, double asyncId);
+	void OnLeaderboardScoresDownloaded(LeaderboardScoresDownloaded_t *pCallback, bool bIOFailure);
+	void OnDownloadLeaderboardEntriesMessage(int nStart, int nEnd, double asyncId);
 
     // Steam events (called via SteamCallbacks class)
 
 private:
 	    CCallResult<WrapperExtension, LeaderboardFindResult_t> m_CallbackFindLeaderboard;
+		// DownloadLeaderboard CCallResult
+		CCallResult<WrapperExtension, LeaderboardScoresDownloaded_t> m_CallbackDownloadLeaderboardEntries;
+
 
 protected:
 	IApplication* iApplication;

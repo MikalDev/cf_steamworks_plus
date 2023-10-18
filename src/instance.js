@@ -11,6 +11,9 @@ function getInstanceJs(parentClass, scriptInterface, addonTriggers, C3) {
       // For trigger results
       this._steamResult = new Map()
 
+      // trigger tag
+      this._triggerTag = ""
+
         if (properties) {
         }
 
@@ -77,9 +80,10 @@ function getInstanceJs(parentClass, scriptInterface, addonTriggers, C3) {
     }
 
     async _UploadLeaderboardScore(score) {
-      console.log('update-leaderboard-score', score)
+      console.log('update-leaderboard-score', score, score.toString())
       const result = await this.SendWrapperExtensionMessageAsync("upload-leaderboard-score", [score]);
       // Check result and respond
+      console.log('update-leaderboard-score result', result)
       const isOk = result["isOk"];
       if (isOk)
       {
@@ -93,17 +97,51 @@ function getInstanceJs(parentClass, scriptInterface, addonTriggers, C3) {
       }
     }
 
+    _RequestData(tag) {
+      console.log('request-data', tag, this._steamResult)
+      return this._steamResult.get(tag);
+    }
+
+    async _DownloadLeaderboardScores(nStart, nEnd) {
+      const tag = "DownloadLeaderboardScores";
+      console.log('download-leaderboard-scores', nStart, nEnd)
+      const result = await this.SendWrapperExtensionMessageAsync("download-leaderboard-scores", [nStart, nEnd]);
+      // Check result and respond
+      console.log('download-leaderboard-scores result', result)
+      const isOk = result["isOk"];
+      if (isOk)
+      {
+        console.log("isOK")
+        this._steamResult.set(tag, result["scores"])
+        this._triggerTag = tag;
+        // Call trigger
+        console.log("Triggering OnRequestResult",C3 )
+        console.log('Plugins',C3.Plugins)
+        this.Trigger(C3.Plugins.cf_steamworks_plus.Cnds.OnRequestResult);
+      }
+      else
+      {
+        console.log("!isOK")
+      }
+    }
+
+    _OnRequestResult(tag) {
+      return this._triggerTag === tag;
+    }
+
     LoadFromJson(o) {
       // load state for savegames
     }
-
+/*
     Trigger(method) {
       super.Trigger(method);
+      console.log("addonTriggers", addonTriggers)
       const addonTrigger = addonTriggers.find((x) => x.method === method);
       if (addonTrigger) {
         this.GetScriptInterface().dispatchEvent(new C3.Event(addonTrigger.id));
       }
     }
+  */
 
     GetScriptInterfaceClass() {
       return scriptInterface;
