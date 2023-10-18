@@ -20,7 +20,7 @@ jobs:
       - name: Install dependencies and build
         run: |
           npm ci
-          npm run build
+          npm run build-addon
 
       - name: Auto Generate Documentation
         run: |
