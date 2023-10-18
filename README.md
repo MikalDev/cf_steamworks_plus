@@ -51,6 +51,7 @@ To build the wrapper extension, you will need:
 
 - [Visual Studio 2022](https://visualstudio.microsoft.com/downloads/) or newer (the *Community* edition is free)
 - The [Steamworks SDK](https://partner.steamgames.com/doc/sdk) - download and extract the *sdk* subfolder in the *steamworks-sdk* subfolder such that the file `steamworks-sdk\public\steam\steam_api.h` exists.
+- Also check build-dll.js - it attempts to find your path to msbuild, this might need more candidates.
 
 ## Add new functions
 - Create new 'group' for different features (e.g. 'workshop')
