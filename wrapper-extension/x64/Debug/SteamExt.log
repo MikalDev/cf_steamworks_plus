@@ -1,3 +1,5 @@
 ﻿  WrapperExtension.cpp
 C:\Users\danps\Projects\cf_steamworks_plus\wrapper-extension\WrapperExtension.cpp(105,35): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
-C:\Users\danps\Projects\cf_steamworks_plus\wrapper-extension\WrapperExtension.cpp(190,1): fatal  error C1075: '{': no matching token found
+  LINK : C:\Users\danps\Projects\cf_steamworks_plus\wrapper-extension\..\construct-plugin\Steam_x64.ext.dll not found or not built by the last incremental link; performing full link
+     Creating library C:\Users\danps\Projects\cf_steamworks_plus\wrapper-extension\..\construct-plugin\Steam_x64.ext.lib and object C:\Users\danps\Projects\cf_steamworks_plus\wrapper-extension\..\construct-plugin\Steam_x64.ext.exp
+  SteamExt.vcxproj -> C:\Users\danps\Projects\cf_steamworks_plus\construct-plugin\Steam_x64.ext.dll

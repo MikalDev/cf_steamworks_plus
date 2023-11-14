@@ -3,7 +3,7 @@ module.exports = {
   addonType: "plugin",
   id: "cf_steamworks_plus",
   name: "Steamworks Plus",
-  version: "1.1.0",
+  version: "1.4.0",
   category: "platform-specific",
   author: "cf",
   website: "https://www.construct.net",
@@ -107,6 +107,7 @@ module.exports = {
     // in the ACEs refer to categories using the id, not the name
     leaderboard: "Leaderboard",
     general: "General",
+    app: "App",
   },
   Acts: {
     /*
@@ -270,10 +271,44 @@ module.exports = {
           type: "number",
           value: 0,
         },
+        {
+          id: "mode",
+          name: "Mode",
+          desc: "Mode.",
+          type: "combo",
+          value: "global",
+          items: [
+            { "global": "Global" },
+            { "global-around-user": "GlobalAroundUser" },
+            { "friends": "Friends" },
+          ],
+        }
       ],
       listName: "Download leaderboard scores",
-      displayText: "Download leaderboard scores from [i]{0}[/i] to [i]{1}[/i]",
+      displayText: "Download leaderboard scores from [i]{0}[/i] to [i]{1}[/i], mode [i]{2}[/i]",
       description: "Download leaderboard scores.",
+    },
+    // Is Dlc installed
+    // Params AppId
+    IsDlcInstalled: {
+      category: "app",
+      forward: "_IsDlcInstalled",
+      autoScriptInterface: true,
+      highlight: false,
+      deprecated: false,
+      isAsync: true,
+      params: [
+        {
+          id: "appId",
+          name: "AppId",
+          desc: "AppId of the DLC.",
+          type: "number",
+          value: 0,
+        },
+      ],
+      listName: "Is DLC installed",
+      displayText: "Is DLC [i]{0}[/i] installed",
+      description: "Is DLC installed.",
     },
   },
   Cnds: {
@@ -308,6 +343,38 @@ module.exports = {
       displayText: "On request result [i]{0}[/i]",
 
       description: "On result of tagged request",
+    },
+    OnRequestError: {
+      // The category of the action as it appears in the add condition dialog
+      category: "general",
+      forward: "_OnRequestError",
+      autoScriptInterface: true,
+      highlight: false,
+      deprecated: false,
+      isTrigger: true,
+      isFakeTrigger: false,
+      isStatic: false,
+      isLooping: false,
+      isInvertible: true,
+      isCompatibleWithTriggers: false,
+
+      // list of parameters
+      params: [
+        {
+          id: "tag",
+          // The name of the parameter.
+          name: "Tag",
+          // The description of the parameter.
+          desc: "Tag of the request error",
+          type: "string",
+          value: "",
+        },
+      ],
+      listName: "OnRequestError",
+
+      displayText: "On request error [i]{0}[/i]",
+
+      description: "On error of tagged request",
     }
   },
     /*
@@ -412,7 +479,7 @@ module.exports = {
       autoScriptInterface: true,
       highlight: false,
       deprecated: false,
-      returnType: "string",
+      returnType: "any",
       isVariadicParameters: false,
       params: [
         {
@@ -423,6 +490,24 @@ module.exports = {
         },
       ],
       description: "Return the data from the last request with the tag as JSON string.",
+    },
+    RequestError: {
+      category: "general",
+      forward: "_RequestError",
+      autoScriptInterface: true,
+      highlight: false,
+      deprecated: false,
+      returnType: "any",
+      isVariadicParameters: false,
+      params: [
+        {
+          id: "tag",
+          name: "Tag",
+          desc: "Tag of the request error",
+          type: "string"
+        },
+      ],
+      description: "Return the error from the last request with the tag as JSON string.",
     },
   },
     /*

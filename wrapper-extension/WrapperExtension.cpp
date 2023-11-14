@@ -100,15 +100,21 @@ void WrapperExtension::HandleWebMessage(const std::string& messageId, const std:
 	} else if (messageId == "upload-leaderboard-score")
 	{
 ;
-		double score = params[0].GetNumber();
+		int score = static_cast<int>(params[0].GetNumber());
 
 		OnUploadLeaderboardScoreMessage(score, asyncId);
 	} else if (messageId == "download-leaderboard-scores")
 	{
 		int nStart = static_cast<int>(params[0].GetNumber());
 		int nEnd = static_cast<int>(params[1].GetNumber());
+		const std::string& mode = params[2].GetString();
 
-		OnDownloadLeaderboardEntriesMessage(nStart, nEnd, asyncId);
+		OnDownloadLeaderboardEntriesMessage(nStart, nEnd, mode, asyncId);
+	} else if (messageId == "is-dlc-installed")
+	{
+		int appId = static_cast<AppId_t>(params[0].GetNumber());
+
+		OnIsDlcInstalledMessage(appId, asyncId);
 	}
 	else
 	{
@@ -175,11 +181,19 @@ void WrapperExtension::OnUploadLeaderboardScoreMessage(int score, double asyncId
 	}
 }
 
-void WrapperExtension::OnDownloadLeaderboardEntriesMessage(int nStart, int nEnd, double asyncId)
+void WrapperExtension::OnDownloadLeaderboardEntriesMessage(int nStart, int nEnd, const std::string& mode, double asyncId)
 {
 	// Find leaderboard by name and store result in global on callback
+	ELeaderboardDataRequest requestMode = k_ELeaderboardDataRequestGlobal;
+	if (mode == "friends")
+	{
+		requestMode = k_ELeaderboardDataRequestFriends;
+	} else if (mode == "global-around-user")
+	{
+		requestMode = k_ELeaderboardDataRequestGlobalAroundUser;
+	}
 	// SteamAPICall_t DownloadLeaderboardEntries( SteamLeaderboard_t hSteamLeaderboard, ELeaderboardDataRequest eLeaderboardDataRequest, int nRangeStart, int nRangeEnd );
-	SteamAPICall_t hLeaderboardScoresDownloaded = SteamUserStats()->DownloadLeaderboardEntries(g_hSteamLeaderboard, k_ELeaderboardDataRequestGlobal, nStart, nEnd);
+	SteamAPICall_t hLeaderboardScoresDownloaded = SteamUserStats()->DownloadLeaderboardEntries(g_hSteamLeaderboard, requestMode, nStart, nEnd);
 	// add callback
 	m_CallbackDownloadLeaderboardEntries.Set(hLeaderboardScoresDownloaded, this, &WrapperExtension::OnLeaderboardScoresDownloaded);
 	// Store asyncId so it can be used in the callback
@@ -215,6 +229,10 @@ void WrapperExtension::OnLeaderboardScoresDownloaded(LeaderboardScoresDownloaded
 		std::string score = std::to_string(leaderboardEntry.m_nScore);
 		std::string name = std::to_string(leaderboardEntry.m_steamIDUser.ConvertToUint64());
 		std::string entry = "{ \"rank\":"+rank+",\"score\":" + score + ",\"steamIDUser\":" + name + " }";
+		if (i != entryCount - 1)
+		{
+			entry += ",";
+		}
 		scoresJSON += entry;
 	}
 	scoresJSON += "]";
@@ -236,6 +254,15 @@ void WrapperExtension::OnLeaderboardScoresDownloaded(LeaderboardScoresDownloaded
 		} 
 			, asyncId);
 	}
-	
+}
+
+void WrapperExtension::OnIsDlcInstalledMessage( AppId_t appID, double asyncId )
+{
+	// Check if DLC is installed
+	bool isDlcInstalled = SteamApps()->BIsDlcInstalled(appID);
+		SendAsyncResponse({
+			{ "isOk", true },
+			{ "isInstalled", isDlcInstalled },
+		}, asyncId);
 }
 

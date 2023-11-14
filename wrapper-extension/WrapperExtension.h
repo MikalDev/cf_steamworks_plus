@@ -25,7 +25,8 @@ public:
     void OnFindLeaderboard(LeaderboardFindResult_t *pCallback, bool bIOFailure);
 	void OnUploadLeaderboardScoreMessage(int score, double asyncId);
 	void OnLeaderboardScoresDownloaded(LeaderboardScoresDownloaded_t *pCallback, bool bIOFailure);
-	void OnDownloadLeaderboardEntriesMessage(int nStart, int nEnd, double asyncId);
+    void OnIsDlcInstalledMessage(AppId_t appID, double asyncId);
+    void OnDownloadLeaderboardEntriesMessage(int nStart, int nEnd, const std::string&, double asyncId);
 
     // Steam events (called via SteamCallbacks class)
 
