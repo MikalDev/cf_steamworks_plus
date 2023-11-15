@@ -3,7 +3,7 @@ module.exports = {
   addonType: "plugin",
   id: "cf_steamworks_plus",
   name: "Steamworks Plus",
-  version: "1.4.0",
+  version: "1.5.0",
   category: "platform-specific",
   author: "cf",
   website: "https://www.construct.net",
@@ -203,7 +203,7 @@ module.exports = {
     FindLeaderboard: {
       // The category of the action as it appears in the add action dialog
       category: "leaderboard",
-      forward: "_FindLeaderboard",
+      forward: "_SetLeaderboard",
       autoScriptInterface: true,
       highlight: true,
       deprecated: false,
@@ -219,9 +219,9 @@ module.exports = {
           value: "",
         },
       ],
-      listName: "Find leaderboard",
-      displayText: "Find leaderboard [i]{0}[/i]",
-      description: "Find leaderboard and set as current leaderboard.",
+      listName: "Set leaderboard",
+      displayText: "Set leaderboard [i]{0}[/i]",
+      description: "Set leaderboard and set as current leaderboard.",
     },
     // Update leaderboard score
     // Params: leaderboardName, score

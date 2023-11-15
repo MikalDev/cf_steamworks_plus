@@ -3,6 +3,13 @@ function getInstanceJs(parentClass, scriptInterface, addonTriggers, C3) {
     constructor(inst, properties) {
       super(inst);
 
+      const Tag = {
+        DownloadLeaderboardScores: Symbol("DownloadLeaderboardScores"),
+        IsDlcInstalled: Symbol("IsDlcInstalled"),
+        SetLeaderboard: Symbol("SetLeaderboard"),
+        UploadLeaderboardScore: Symbol("UploadLeaderboardScore"),
+      }
+
       this.SetWrapperExtensionComponentId("cf-steam-plus");
 
       // For trigger results
@@ -48,8 +55,9 @@ function getInstanceJs(parentClass, scriptInterface, addonTriggers, C3) {
       const result = await this.SendWrapperExtensionMessageAsync("run-callbacks");
     }
 
-    async _FindLeaderboard(leaderboardName)
+    async _SetLeaderboard(leaderboardName)
     {
+      const tag = this.Tag.SetLeaderboard;
       const result = await this.SendWrapperExtensionMessageAsync("find-leaderboard", [leaderboardName]);
   
       this._triggerLeaderboardName = leaderboardName;
@@ -57,13 +65,15 @@ function getInstanceJs(parentClass, scriptInterface, addonTriggers, C3) {
       const isOk = result["isOk"];
       if (isOk)
       {
-        // this.Trigger(C3.Plugins.Steamworks_Ext.Cnds.OnAnyAchievementUnlockSuccess);
-        // this.Trigger(C3.Plugins.Steamworks_Ext.Cnds.OnAchievementUnlockSuccess);
+        this._steamResult.set(tag.toUpperCase(), { leaderboardName, result: 1 })
+        this._triggerTag = tag.toUpperCase();
+        this.Trigger(C3.Plugins.cf_steamworks_plus.Cnds.OnRequestResult);
       }
       else
       {
-        // this.Trigger(C3.Plugins.Steamworks_Ext.Cnds.OnAnyAchievementUnlockError);
-        // this.Trigger(C3.Plugins.Steamworks_Ext.Cnds.OnAchievementUnlockError);
+        this._steamError.set(tag.toUpperCase(), { leaderboardName, result: 0 })
+        this._triggerTag = tag.toUpperCase();
+        this.Trigger(C3.Plugins.cf_steamworks_plus.Cnds.OnRequestError);
       }
   
       // Return result for script interface
@@ -71,17 +81,21 @@ function getInstanceJs(parentClass, scriptInterface, addonTriggers, C3) {
     }
 
     async _UploadLeaderboardScore(score) {
-      console.log('update-leaderboard-score', score, score.toString())
+      tag = this.Tag.UploadLeaderboardScore;
       const result = await this.SendWrapperExtensionMessageAsync("upload-leaderboard-score", [score]);
       // Check result and respond
       const isOk = result["isOk"];
       if (isOk)
       {
-        // this.Trigger(C3.Plugins.Steamworks_Ext.Cnds.OnAnyAchievementUnlockSuccess);
+        this._steamResult.set(tag.toUpperCase(), { score, result: 1 })
+        this._triggerTag = tag.toUpperCase();
+        this.Trigger(C3.Plugins.cf_steamworks_plus.Cnds.OnRequestResult);
       }
       else
       {
-        // this.Trigger(C3.Plugins.Steamworks_Ext.Cnds.OnAnyAchievementUnlockError);
+        this._steamError.set(tag.toUpperCase(), { score, result: 0 })
+        this._triggerTag = tag.toUpperCase();
+        this.Trigger(C3.Plugins.cf_steamworks_plus.Cnds.OnRequestError);
       }
     }
 
@@ -108,7 +122,7 @@ function getInstanceJs(parentClass, scriptInterface, addonTriggers, C3) {
     }
 
     async _DownloadLeaderboardScores(nStart, nEnd, mode) {
-      const tag = "DownloadLeaderboardScores";
+      const tag = this.Tag.DownloadLeaderboardScores;
       const requestMode = mode === 0 ? "global" : mode === 1 ? "global-around-user" : "friends";
 
       const result = await this.SendWrapperExtensionMessageAsync("download-leaderboard-scores", [nStart, nEnd, requestMode]);
@@ -130,7 +144,7 @@ function getInstanceJs(parentClass, scriptInterface, addonTriggers, C3) {
     }
 
     async _IsDlcInstalled(appId) {
-      const tag = "IsDlcInstalled";
+      const tag = this.Tag.IsDlcInstalled;
       console.log('is-dlc-installed', appId)
       const result = await this.SendWrapperExtensionMessageAsync("is-dlc-installed", [appId]);
       // Check result and respond
