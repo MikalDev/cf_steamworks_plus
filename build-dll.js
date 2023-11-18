@@ -4,7 +4,7 @@ const fs = require('fs');
 function findMSBuildPath() {
     // Common paths for various versions of Visual Studio
     const potentialPaths = [
-        'C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/',
+        'C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\',
         'C:/Program Files/Microsoft Visual Studio/2019/Community/MSBuild/Current/Bin/',
         'C:/Program File/Microsoft Visual Studio/2017/Community/MSBuild/15.0/Bin/',
         // Add more paths as necessary
@@ -28,12 +28,14 @@ function findMSBuildPath() {
 }
 
 const msbuildPath = findMSBuildPath();
-const projectPath = "wrapper-extension/SteamExt.sln"
+const projectPath = "wrapper-extension\\SteamExt.sln"
 
 if (msbuildPath) {
     exec(`"${msbuildPath}" ${projectPath} /t:Build /p:Configuration=Release`, (error, stdout, stderr) => {
         if (error) {
             console.error(`exec error: ${error}`);
+            console.error(`stdout: ${stdout}`);
+            console.error(`stderr: ${stderr}`);
             return;
         }
 

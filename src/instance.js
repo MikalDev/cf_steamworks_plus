@@ -3,11 +3,12 @@ function getInstanceJs(parentClass, scriptInterface, addonTriggers, C3) {
     constructor(inst, properties) {
       super(inst);
 
-      const Tag = {
-        DownloadLeaderboardScores: Symbol("DownloadLeaderboardScores"),
-        IsDlcInstalled: Symbol("IsDlcInstalled"),
-        SetLeaderboard: Symbol("SetLeaderboard"),
-        UploadLeaderboardScore: Symbol("UploadLeaderboardScore"),
+      this._Tag = {
+        DownloadLeaderboardScores: "DownloadLeaderboardScores",
+        IsDlcInstalled: "IsDlcInstalled",
+        SetLeaderboard: "SetLeaderboard",
+        UploadLeaderboardScore: "UploadLeaderboardScore",
+        GetFriendPersonaName: "GetFriendPersonaName",
       }
 
       this.SetWrapperExtensionComponentId("cf-steam-plus");
@@ -57,7 +58,7 @@ function getInstanceJs(parentClass, scriptInterface, addonTriggers, C3) {
 
     async _SetLeaderboard(leaderboardName)
     {
-      const tag = this.Tag.SetLeaderboard;
+      const tag = this._Tag.SetLeaderboard;
       const result = await this.SendWrapperExtensionMessageAsync("find-leaderboard", [leaderboardName]);
   
       this._triggerLeaderboardName = leaderboardName;
@@ -81,7 +82,7 @@ function getInstanceJs(parentClass, scriptInterface, addonTriggers, C3) {
     }
 
     async _UploadLeaderboardScore(score) {
-      tag = this.Tag.UploadLeaderboardScore;
+      tag = this._Tag.UploadLeaderboardScore;
       const result = await this.SendWrapperExtensionMessageAsync("upload-leaderboard-score", [score]);
       // Check result and respond
       const isOk = result["isOk"];
@@ -122,7 +123,7 @@ function getInstanceJs(parentClass, scriptInterface, addonTriggers, C3) {
     }
 
     async _DownloadLeaderboardScores(nStart, nEnd, mode) {
-      const tag = this.Tag.DownloadLeaderboardScores;
+      const tag = this._Tag.DownloadLeaderboardScores;
       const requestMode = mode === 0 ? "global" : mode === 1 ? "global-around-user" : "friends";
 
       const result = await this.SendWrapperExtensionMessageAsync("download-leaderboard-scores", [nStart, nEnd, requestMode]);
@@ -144,11 +145,9 @@ function getInstanceJs(parentClass, scriptInterface, addonTriggers, C3) {
     }
 
     async _IsDlcInstalled(appId) {
-      const tag = this.Tag.IsDlcInstalled;
-      console.log('is-dlc-installed', appId)
+      const tag = this._Tag.IsDlcInstalled;
       const result = await this.SendWrapperExtensionMessageAsync("is-dlc-installed", [appId]);
       // Check result and respond
-      console.log('is-dlc-installed result', result)
       const isOk = result["isOk"];
       if (isOk)
       {
@@ -172,6 +171,26 @@ function getInstanceJs(parentClass, scriptInterface, addonTriggers, C3) {
       // Check for match between tag and trigger tag, change both to upper case before comparing
       const match = this._triggerTag.toUpperCase() === tag.toUpperCase();
       return match;
+    }
+
+    async _GetFriendPersonaName(steamId) {
+      const tag = this._Tag.GetFriendPersonaName;
+      const result = await this.SendWrapperExtensionMessageAsync("get-friend-persona-name", [steamId]);
+      // Check result and respond
+      const isOk = result["isOk"];
+      if (isOk)
+      {
+        this._steamResult.set(tag.toUpperCase(), result["friendPersonaName"])
+        this._triggerTag = tag.toUpperCase();
+        // Call trigger
+        this.Trigger(C3.Plugins.cf_steamworks_plus.Cnds.OnRequestResult);
+      }
+      else
+      {
+        this._steamError.set(tag.toUpperCase(), `error:${tag}: no name found`)
+        this._triggerTag = tag.toUpperCase();
+        this.Trigger(C3.Plugins.cf_steamworks_plus.Cnds.OnRequestError);
+      }
     }
 
     LoadFromJson(o) {

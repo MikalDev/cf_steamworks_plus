@@ -3,7 +3,7 @@ module.exports = {
   addonType: "plugin",
   id: "cf_steamworks_plus",
   name: "Steamworks Plus",
-  version: "1.5.0",
+  version: "1.6.0",
   category: "platform-specific",
   author: "cf",
   website: "https://www.construct.net",
@@ -108,6 +108,7 @@ module.exports = {
     leaderboard: "Leaderboard",
     general: "General",
     app: "App",
+    friends: "Friends",
   },
   Acts: {
     /*
@@ -309,6 +310,28 @@ module.exports = {
       listName: "Is DLC installed",
       displayText: "Is DLC [i]{0}[/i] installed",
       description: "Is DLC installed.",
+    },
+    // GetFriendPersonaName
+    // Params: friendId
+    GetFriendPersonaName: {
+      category: "friends",
+      forward: "_GetFriendPersonaName",
+      autoScriptInterface: true,
+      highlight: false,
+      deprecated: false,
+      isAsync: true,
+      params: [
+        {
+          id: "friendId",
+          name: "FriendId",
+          desc: "FriendId.",
+          type: "string",
+          value: "",
+        },
+      ],
+      listName: "Get friend persona name",
+      displayText: "Get friend persona name [i]{0}[/i]",
+      description: "Get friend persona name.",
     },
   },
   Cnds: {

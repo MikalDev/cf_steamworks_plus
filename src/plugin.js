@@ -147,7 +147,6 @@ Object.keys(PLUGIN_INFO.Acts).forEach((key) => {
   };
 });
 Object.keys(PLUGIN_INFO.Cnds).forEach((key) => {
-  console.log("key", key);
   const ace = PLUGIN_INFO.Cnds[key];
   P_C.Cnds[camelCasify(key)] = function (...args) {
     if (ace.forward) return ace.forward(this).call(this, ...args);

@@ -17,7 +17,9 @@ public:
 	void OnWebMessage(LPCSTR messageId, size_t paramCount, const ExtensionParameterPOD* paramArr, double asyncId);
 	void HandleWebMessage(const std::string& messageId, const std::vector<ExtensionParameter>& params, double asyncId);
 
-	void SendWebMessage(const std::string& messageId, const std::map<std::string, ExtensionParameter>& params, double asyncId = -1.0);
+    CSteamID StringToSteamID(const std::string &steamIDString);
+
+    void SendWebMessage(const std::string& messageId, const std::map<std::string, ExtensionParameter>& params, double asyncId = -1.0);
 	void SendAsyncResponse(const std::map<std::string, ExtensionParameter>& params, double asyncId);
 
 	// Handler methods for specific kinds of message
@@ -26,7 +28,8 @@ public:
 	void OnUploadLeaderboardScoreMessage(int score, double asyncId);
 	void OnLeaderboardScoresDownloaded(LeaderboardScoresDownloaded_t *pCallback, bool bIOFailure);
     void OnIsDlcInstalledMessage(AppId_t appID, double asyncId);
-    void OnDownloadLeaderboardEntriesMessage(int nStart, int nEnd, const std::string&, double asyncId);
+    void OnGetFriendPersonaNameMessage(CSteamID steamIDFriend, double asyncId);
+    void OnDownloadLeaderboardEntriesMessage(int nStart, int nEnd, const std::string &, double asyncId);
 
     // Steam events (called via SteamCallbacks class)
 
