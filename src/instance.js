@@ -65,16 +65,11 @@ function getInstanceJs(parentClass, scriptInterface, addonTriggers, C3) {
           // iterate through the messages which are stored as objects with index keys
           for (let i = 0; i < nMessages; i++) {
             const message = messages[i.toString()];
-            const messageString = message["message"];
-            const senderSteamId = message["senderSteamId"];
             // set the result for the tag
-            this._steamResult.set(tag.toUpperCase(), { messageString, senderSteamId })
+            this._steamResult.set(tag.toUpperCase(), JSON.stringify(message))
             this._triggerTag = tag.toUpperCase();
             this.Trigger(C3.Plugins.cf_steamworks_plus.Cnds.OnRequestResult);
           }
-
-
-
         }
       } else {
         console.log("poll-networking error", result)

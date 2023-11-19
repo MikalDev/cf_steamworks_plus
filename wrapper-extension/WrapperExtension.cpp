@@ -352,11 +352,14 @@ void WrapperExtension::OnSendMessageToUserMessage( CSteamID steamID, const std::
 	// Send message to user
 	// Get message length cast as uint32
 	uint32 messageLength = static_cast<uint32>(message.length());
+	const char* messageP = message.c_str();
 	std::string debugMessage = "Send Message: ";
     debugMessage += SteamIDToString(steamID)+" ";
     debugMessage += message; 
 	OutputDebugStringA(debugMessage.c_str());
-	EResult result = SteamNetworkingMessages()->SendMessageToUser(identityRemote, message.c_str(), messageLength, k_nSteamNetworkingSend_Reliable, 0);
+	// create nOptions variable with these enums k_nSteamNetworkingSend_AutoRestartBrokenSession and k_nSteamNetworkingSend_Reliable
+	int nSendFlags = k_nSteamNetworkingSend_AutoRestartBrokenSession | k_nSteamNetworkingSend_Reliable;
+	EResult result = SteamNetworkingMessages()->SendMessageToUser(identityRemote, messageP, messageLength, nSendFlags, 0);
 	if (result != k_EResultOK)
 	{
 		// Error
@@ -366,6 +369,7 @@ void WrapperExtension::OnSendMessageToUserMessage( CSteamID steamID, const std::
 			{ "isOk", false},
 			{ "error", error},
 		}, asyncId);
+		OutputDebugStringA(error.c_str());
 	}
 	else
 	{
@@ -415,14 +419,17 @@ void WrapperExtension::OnReceiveMessagesMessage( int nLocalChannel, double async
 			SteamNetworkingMessage_t* message = pOutMessages[i];
 			// Get message data
 			const char* messageData = (const char*)message->m_pData;
-			// Create string from message data
-			std::string messageString(messageData);
+			// Get message data length
+			int messageDataLength = message->m_cbSize;
+			// Create string using message data and message data length
+			std::string messageString = std::string(messageData, messageDataLength);
 			// Create string from message identityPeer
-			std::string messageIdentityPeerString = std::to_string(message->m_identityPeer.GetSteamID().ConvertToUint64());
+			std::string messageIdentityPeerString = std::to_string(message->m_identityPeer.m_steamID64);
+			std::string timeReceivedString = std::to_string(message->m_usecTimeReceived);
 			// store messageString and messageIdentityPeer in json object within an array
 			OutputDebugString(L"[SteamExt] Add to JSON\n");
 			// add message and identitPeer to messageJSONString object with key iS
-			messagesJSONString += "\"" + iS + "\":{\"message\":\"" + messageString + "\",\"identityPeer\":\"" + messageIdentityPeerString + "\"}";
+			messagesJSONString += "\"" + iS + "\":{\"message\":\"" + messageString + "\",\"identityPeer\":\"" + messageIdentityPeerString + "\",\"timeReceived\":\"" + timeReceivedString + "\"}";
 			// if not last entry add comma, else add closing bracket
 			if (i != nMessages - 1)
 			{
