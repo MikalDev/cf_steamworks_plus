@@ -127,12 +127,22 @@ void WrapperExtension::HandleWebMessage(const std::string& messageId, const std:
 		CSteamID steamIDFriend = StringToSteamID(params[0].GetString().c_str());
 		
 		OnGetFriendPersonaNameMessage(steamIDFriend, asyncId);
+	} else if (messageId == "send-message-to-user")
+	{
+		CSteamID steamID = StringToSteamID(params[0].GetString().c_str());
+		const std::string& message = params[1].GetString();
+		OnSendMessageToUserMessage(steamID, message, asyncId);
+	} else if (messageId == "receive-messages")
+	{
+		int nLocalChannel = static_cast<int>(params[0].GetNumber());
+		OnReceiveMessagesMessage(nLocalChannel, asyncId);
 	}
 	else
 	{
 		OutputDebugString(L"[SteamExt] Unknown message ID\n");
 		SendAsyncResponse({
-		{ "isOk", false }
+		{ "isOk", false },
+		{ "error", "Unknown message ID" },
 		}, asyncId);
 	}
 }
@@ -323,5 +333,109 @@ void WrapperExtension::OnGetFriendPersonaNameMessage( CSteamID steamIDFriend, do
 			{ "friendPersonaName", friendPersonaName },
 		}, asyncId);
 	}
-}	
+}
+
+// wrapper extension for EResult SendMessageToUser( const SteamNetworkingIdentity &identityRemote, const void *pubData, uint32 cubData, int nSendFlags, int nRemoteChannel );
+void WrapperExtension::OnSendMessageToUserMessage( CSteamID steamID, const std::string& message, double asyncId )
+{
+	// Set SteamNetworkingIdentity
+	SteamNetworkingIdentity identityRemote;
+	identityRemote.SetSteamID(steamID);
+	// Send message to user
+	// Get message length cast as uint32
+	uint32 messageLength = static_cast<uint32>(message.length());
+	std::string debugMessage = "Send Message: ";
+    debugMessage += steamID.GetAccountID();
+    debugMessage += message; 
+	OutputDebugStringA(debugMessage.c_str());
+	EResult result = SteamNetworkingMessages()->SendMessageToUser(identityRemote, message.c_str(), messageLength, k_nSteamNetworkingSend_Reliable, 0);
+	if (result != k_EResultOK)
+	{
+		// Error
+		// Create string from result
+		std::string error = std::to_string(result);
+		SendAsyncResponse({
+			{ "isOk", false},
+			{ "error", error},
+		}, asyncId);
+	}
+	else
+	{
+		// Success
+		SendAsyncResponse({
+			{ "isOk", true },
+		}, asyncId);
+	}
+}
+
+// wrapper extension for int ReceiveMessagesOnChannel( int nLocalChannel, SteamNetworkingMessage_t **ppOutMessages, int nMaxMessages )
+// put all messages in a string array and send them back to the extension via sendAsyncResponse
+void WrapperExtension::OnReceiveMessagesMessage( int nLocalChannel, double asyncId )
+{
+	int nMaxMessages = 100;
+	// Receive messages on channel
+	// Allocate memory for pOutMessages
+	SteamNetworkingMessage_t* pOutMessages[100];
+	// SteamNetworkingMessage_t** pOutMessages = new SteamNetworkingMessage_t*[nMaxMessages];
+
+	int nMessages = SteamNetworkingMessages()->ReceiveMessagesOnChannel(nLocalChannel, pOutMessages, nMaxMessages);
+	// convert nMessages to string
+	std::string nMessagesString = std::to_string(nMessages);
+	// std::string debugMessage = "Rcv Message: ";
+    // debugMessage += nMessagesString;
+	// OutputDebugStringA(debugMessage.c_str());
+	// Check if messages were received
+	if (nMessages == 0)
+	{
+		// Error
+		SendAsyncResponse({
+			{ "isOk", true },
+			{ "messages", "[]" },
+			{ "nMessages", nMessagesString },
+		}, asyncId);
+	}
+	else
+	{
+		OutputDebugString(L"[SteamExt] Received messages\n");
+		// Go through messages and store them in the string array
+		std::string messagesJSONString = "{";
+		for (int i = 0; i < nMessages; i++)
+		{
+			OutputDebugString(L"[SteamExt] processing message\n");
+			std::string iS = std::to_string(i); 
+			// Get message
+			SteamNetworkingMessage_t* message = pOutMessages[i];
+			// Get message data
+			const char* messageData = (const char*)message->m_pData;
+			// Create string from message data
+			std::string messageString(messageData);
+			// Create string from message identityPeer
+			std::string messageIdentityPeerString = std::to_string(message->m_identityPeer.GetSteamID().ConvertToUint64());
+			// store messageString and messageIdentityPeer in json object within an array
+			OutputDebugString(L"[SteamExt] Add to JSON\n");
+			// add message and identitPeer to messageJSONString object with key iS
+			messagesJSONString += "\"" + iS + "\":{\"message\":\"" + messageString + "\",\"identityPeer\":\"" + messageIdentityPeerString + "\"}";
+			// if not last entry add comma, else add closing bracket
+			if (i != nMessages - 1)
+			{
+				messagesJSONString += ",";
+			}
+			else
+			{
+				messagesJSONString += "}";
+			}
+			OutputDebugString(L"[SteamExt] Added to JSON\n");
+			message->Release();
+		}
+		// convert json object to string
+		OutputDebugString(L"[SteamExt] JSON string output\n");
+		OutputDebugStringA(messagesJSONString.c_str());
+		// Send messages back to extension
+		SendAsyncResponse({
+			{ "isOk", true },
+			{ "messages", messagesJSONString },
+			{ "nMessages", nMessagesString },
+		}, asyncId);
+	}
+}
 

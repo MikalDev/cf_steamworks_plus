@@ -29,6 +29,8 @@ public:
 	void OnLeaderboardScoresDownloaded(LeaderboardScoresDownloaded_t *pCallback, bool bIOFailure);
     void OnIsDlcInstalledMessage(AppId_t appID, double asyncId);
     void OnGetFriendPersonaNameMessage(CSteamID steamIDFriend, double asyncId);
+    void OnSendMessageToUserMessage(CSteamID steamID, const std::string &message, double asyncId);
+    void OnReceiveMessagesMessage(int nLocalChannel, double asyncId);
     void OnDownloadLeaderboardEntriesMessage(int nStart, int nEnd, const std::string &, double asyncId);
 
     // Steam events (called via SteamCallbacks class)

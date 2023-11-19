@@ -109,6 +109,7 @@ module.exports = {
     general: "General",
     app: "App",
     friends: "Friends",
+    networkingMessages: "Networking Messages",
   },
   Acts: {
     /*
@@ -332,6 +333,57 @@ module.exports = {
       listName: "Get friend persona name",
       displayText: "Get friend persona name [i]{0}[/i]",
       description: "Get friend persona name.",
+    },
+    // SendMesssageToUser
+    // Params: identityRemote, message
+    SendMessageToUser: {
+      category: "networkingMessages",
+      forward: "_SendMessageToUser",
+      autoScriptInterface: true,
+      highlight: false,
+      deprecated: false,
+      isAsync: true,
+      params: [
+        {
+          id: "identityRemote",
+          name: "Identity remote",
+          desc: "Identity remote. (SteamId)",
+          type: "string",
+          value: "",
+        },
+        {
+          id: "message",
+          name: "Message",
+          desc: "Message.",
+          type: "string",
+          value: "",
+        },
+      ],
+      listName: "Send message to user",
+      displayText: "Send message [i]{1}[/i] to user [i]{0}[/i]",
+      description: "Send message to user.",
+    },
+    // Enable networking by setting this.networkingEnabled to true
+    // Params: enable: boolean
+    EnableNetworking: {
+      category: "networkingMessages",
+      forward: "_EnableNetworking",
+      autoScriptInterface: true,
+      highlight: false,
+      deprecated: false,
+      isAsync: false,
+      params: [
+        {
+          id: "enable",
+          name: "Enable",
+          desc: "Enable networking.",
+          type: "boolean",
+          value: true,
+        },
+      ],
+      listName: "Enable networking",
+      displayText: "Enable networking [i]{0}[/i]",
+      description: "Enable networking.",
     },
   },
   Cnds: {

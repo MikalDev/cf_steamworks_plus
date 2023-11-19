@@ -9,6 +9,8 @@ function getInstanceJs(parentClass, scriptInterface, addonTriggers, C3) {
         SetLeaderboard: "SetLeaderboard",
         UploadLeaderboardScore: "UploadLeaderboardScore",
         GetFriendPersonaName: "GetFriendPersonaName",
+        SendMessageToUser: "SendMessageToUser",
+        OnNetworkingMessage: "OnNetworkingMessage",
       }
 
       this.SetWrapperExtensionComponentId("cf-steam-plus");
@@ -16,6 +18,7 @@ function getInstanceJs(parentClass, scriptInterface, addonTriggers, C3) {
       // For trigger results
       this._steamResult = new Map()
       this._steamError = new Map()
+      this._enableNetworking = false
 
       // trigger tag
       this._triggerTag = ""
@@ -38,7 +41,7 @@ function getInstanceJs(parentClass, scriptInterface, addonTriggers, C3) {
       };
     }
 
-    Tick() {
+    async Tick() {
       // On the first tick, clear the timer running callbacks for the loading screen.
       /*
       if (this._loadingTimerId !== -1)
@@ -47,7 +50,39 @@ function getInstanceJs(parentClass, scriptInterface, addonTriggers, C3) {
         this._loadingTimerId = -1;
       }
       */
-      
+     if (this._enableNetworking) {
+      // send a message to the wrapper extension to poll for networking messages
+      const tag = this._Tag.OnNetworkingMessage;
+      // Channel number
+      const result = await this.SendWrapperExtensionMessageAsync("receive-messages",[0]);
+      const isOk = result["isOk"];
+      if (isOk)
+      {
+        const nMessages = parseInt(result["nMessages"]);
+        if (nMessages > 0) {
+          const messages = JSON.parse(result["messages"]);
+          console.log("messages", messages)
+          // iterate through the messages which are stored as objects with index keys
+          for (let i = 0; i < nMessages; i++) {
+            const message = messages[i.toString()];
+            const messageString = message["message"];
+            const senderSteamId = message["senderSteamId"];
+            // set the result for the tag
+            this._steamResult.set(tag.toUpperCase(), { messageString, senderSteamId })
+            this._triggerTag = tag.toUpperCase();
+            this.Trigger(C3.Plugins.cf_steamworks_plus.Cnds.OnRequestResult);
+          }
+
+
+
+        }
+      } else {
+        console.log("poll-networking error", result)
+        this._steamResult.set(tag.toUpperCase(), "error:poll-networking")
+        this._triggerTag = tag.toUpperCase();
+        this.Trigger(C3.Plugins.cf_steamworks_plus.Cnds.OnRequestError);
+  }
+     }
     }
 
     async _RunCallbacks()
@@ -191,6 +226,31 @@ function getInstanceJs(parentClass, scriptInterface, addonTriggers, C3) {
         this._triggerTag = tag.toUpperCase();
         this.Trigger(C3.Plugins.cf_steamworks_plus.Cnds.OnRequestError);
       }
+    }
+
+    async _SendMessageToUser(identityRemote, message) {
+      const tag = this._Tag.SendMessageToUser;
+      const result = await this.SendWrapperExtensionMessageAsync("send-message-to-user", [identityRemote, message]);
+      // Check result and respond
+      const isOk = result["isOk"];
+      if (isOk)
+      {
+        this._steamResult.set(tag.toUpperCase(), "")
+        this._triggerTag = tag.toUpperCase();
+        // Call trigger
+        this.Trigger(C3.Plugins.cf_steamworks_plus.Cnds.OnRequestResult);
+      }
+      else
+      {
+        this._steamError.set(tag.toUpperCase(), result["error"])
+        this._triggerTag = tag.toUpperCase();
+        this.Trigger(C3.Plugins.cf_steamworks_plus.Cnds.OnRequestError);
+      }
+      return result;
+    }
+
+    _EnableNetworking(enable) {
+      this._enableNetworking = enable;
     }
 
     LoadFromJson(o) {
