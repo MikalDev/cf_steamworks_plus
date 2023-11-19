@@ -168,6 +168,14 @@ CSteamID WrapperExtension::StringToSteamID(const std::string& steamIDString) {
     }
 }
 
+// CSteamID to string
+std::string WrapperExtension::SteamIDToString(CSteamID steamID) {
+	std::stringstream ss;
+	ss << steamID.ConvertToUint64();
+	return ss.str();
+}
+
+
 void WrapperExtension::OnFindLeaderboardMessage(const std::string& name, double asyncId)
 {
 	// Find leaderboard by name and store result in global on callback
@@ -345,7 +353,7 @@ void WrapperExtension::OnSendMessageToUserMessage( CSteamID steamID, const std::
 	// Get message length cast as uint32
 	uint32 messageLength = static_cast<uint32>(message.length());
 	std::string debugMessage = "Send Message: ";
-    debugMessage += steamID.GetAccountID();
+    debugMessage += SteamIDToString(steamID)+" ";
     debugMessage += message; 
 	OutputDebugStringA(debugMessage.c_str());
 	EResult result = SteamNetworkingMessages()->SendMessageToUser(identityRemote, message.c_str(), messageLength, k_nSteamNetworkingSend_Reliable, 0);

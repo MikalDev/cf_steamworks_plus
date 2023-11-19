@@ -19,6 +19,8 @@ public:
 
     CSteamID StringToSteamID(const std::string &steamIDString);
 
+    std::string SteamIDToString(CSteamID steamID);
+
     void SendWebMessage(const std::string& messageId, const std::map<std::string, ExtensionParameter>& params, double asyncId = -1.0);
 	void SendAsyncResponse(const std::map<std::string, ExtensionParameter>& params, double asyncId);
 
