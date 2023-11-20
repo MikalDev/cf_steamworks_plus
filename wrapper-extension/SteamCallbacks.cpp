@@ -10,9 +10,10 @@ SteamCallbacks::SteamCallbacks(WrapperExtension& extension_)
 	: extension(extension_)
 {
 }
-/*
-	void SteamCallbacks::OnFindLeaderboard(LeaderboardFindResult_t* pCallback)
+
+void SteamCallbacks::OnSessionRequest(SteamNetworkingMessagesSessionRequest_t* pCallback)
 {
-	extension.OnFindLeaderboard(pCallback);
+	// output debug
+	OutputDebugString(L"SteamCallbacks::OnSessionRequest\n");
+	extension.OnSessionRequest(pCallback);
 }
-*/

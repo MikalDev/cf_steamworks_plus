@@ -11,7 +11,7 @@ public:
 protected:
 	WrapperExtension& extension;
 
-	// STEAM_CALLBACK(SteamCallbacks, OnFindLeaderboard, LeaderboardFindResult_t);
+	STEAM_CALLBACK(SteamCallbacks, OnSessionRequest, SteamNetworkingMessagesSessionRequest_t);
 };
 
 

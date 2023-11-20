@@ -385,6 +385,28 @@ module.exports = {
       displayText: "Enable networking [i]{0}[/i]",
       description: "Enable networking.",
     },
+    // AcceptSessionWithUser
+    // Params: remoteSteamId as string
+    AcceptSessionWithUser: {
+      category: "networkingMessages",
+      forward: "_AcceptSessionWithUser",
+      autoScriptInterface: true,
+      highlight: false,
+      deprecated: false,
+      isAsync: true,
+      params: [
+        {
+          id: "remoteSteamId",
+          name: "Remote SteamId",
+          desc: "Remote SteamId.",
+          type: "string",
+          value: "",
+        },
+      ],
+      listName: "Accept session with user",
+      displayText: "Accept session with user [i]{0}[/i]",
+      description: "Accept session with user.",
+    },
   },
   Cnds: {
     OnRequestResult: {
@@ -450,8 +472,29 @@ module.exports = {
       displayText: "On request error [i]{0}[/i]",
 
       description: "On error of tagged request",
-    }
+    },
+    OnSessionRequest: {
+      category: "networkingMessages",
+      forward: "_OnSessionRequest",
+      autoScriptInterface: true,
+      highlight: false,
+      deprecated: false,
+      isTrigger: true,
+      isFakeTrigger: false,
+      isStatic: false,
+      isLooping: false,
+      isInvertible: true,
+      isCompatibleWithTriggers: false,
+      // list of parameters
+      params: [
+      ],
+      listName: "On session request",
+      displayText: "On session request",
+      description: "On session request",
+    },
   },
+
+
     /*
     SampleCondition: {
       // The category of the action as it appears in the add condition dialog

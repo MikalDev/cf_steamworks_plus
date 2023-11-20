@@ -48,6 +48,8 @@ static double g_SteamLeaderboardAsyncId = 0;
 static double g_SteamDownloadLeaderboardEntriesAsyncId = 0;
 static SteamLeaderboardEntries_t g_hSteamLeaderboardEntries  = 0;
 static int g_SteamLeaderboardEntryCount = 0;
+// map that contains key of uint64 and value of identityRemote
+static std::unordered_map<uint64, SteamNetworkingIdentity> g_SteamNetworkingIdentities;
 
 //////////////////////////////////////////////////////
 // WrapperExtension
@@ -68,6 +70,7 @@ WrapperExtension::WrapperExtension(IApplication* iApplication_)
 void WrapperExtension::Init()
 {
 	// Called during startup after all other extensions have been loaded.
+	steamCallbacks.reset(new SteamCallbacks(*this));
 }
 
 void WrapperExtension::Release()
@@ -136,6 +139,18 @@ void WrapperExtension::HandleWebMessage(const std::string& messageId, const std:
 	{
 		int nLocalChannel = static_cast<int>(params[0].GetNumber());
 		OnReceiveMessagesMessage(nLocalChannel, asyncId);
+	} else if (messageId == "accept-session-from-user")
+	{
+		CSteamID steamIDRemote = StringToSteamID(params[0].GetString().c_str());
+		OnAcceptSessionWithUserMessage(steamIDRemote, asyncId);
+	} else if (messageId == "enable-networking")
+	{
+		bool enable = params[0].GetBool();
+		if (enable && !m_bNetworkingMessagesEnabled)
+		{
+			steamCallbacks.reset(new SteamCallbacks(*this));
+			m_bNetworkingMessagesEnabled = true;
+		}
 	}
 	else
 	{
@@ -324,7 +339,14 @@ void WrapperExtension::OnGetFriendPersonaNameMessage( CSteamID steamIDFriend, do
 	const char* friendPersonaName = SteamFriends()->GetFriendPersonaName(steamIDFriend);
 	// check if const char* friendPersonaName is empty or "[unknown]"
 
-
+	// Get CSTeamID from friendPersonaName
+	CSteamID steamIDFriendPN = SteamFriends()->GetFriendByIndex(1, k_EFriendFlagImmediate);
+	// steamIDFriendPN to string
+	std::string steamIDFriendPNString = SteamIDToString(steamIDFriendPN);
+	// cocatenate steamIDFriendPNString with friendPersonaName
+	std::string debugMessage = "Get Friend Persona Name: ";
+	debugMessage += steamIDFriendPNString + ":";
+	debugMessage += friendPersonaName;
 
 	if (friendPersonaName == nullptr || strlen(friendPersonaName) == 0 || strcmp(friendPersonaName, "[unknown]") == 0)
 	{
@@ -338,7 +360,8 @@ void WrapperExtension::OnGetFriendPersonaNameMessage( CSteamID steamIDFriend, do
 		// Success
 		SendAsyncResponse({
 			{ "isOk", true },
-			{ "friendPersonaName", friendPersonaName },
+//			{ "friendPersonaName", friendPersonaName },
+			{ "friendPersonaName", debugMessage },
 		}, asyncId);
 	}
 }
@@ -354,9 +377,10 @@ void WrapperExtension::OnSendMessageToUserMessage( CSteamID steamID, const std::
 	uint32 messageLength = static_cast<uint32>(message.length());
 	const char* messageP = message.c_str();
 	std::string debugMessage = "Send Message: ";
-    debugMessage += SteamIDToString(steamID)+" ";
-    debugMessage += message; 
-	OutputDebugStringA(debugMessage.c_str());
+    debugMessage += SteamIDToString(steamID)+":";
+    debugMessage += message;
+	debugMessage += "\n";
+	// OutputDebugStringA(debugMessage.c_str());
 	// create nOptions variable with these enums k_nSteamNetworkingSend_AutoRestartBrokenSession and k_nSteamNetworkingSend_Reliable
 	int nSendFlags = k_nSteamNetworkingSend_AutoRestartBrokenSession | k_nSteamNetworkingSend_Reliable;
 	EResult result = SteamNetworkingMessages()->SendMessageToUser(identityRemote, messageP, messageLength, nSendFlags, 0);
@@ -377,6 +401,8 @@ void WrapperExtension::OnSendMessageToUserMessage( CSteamID steamID, const std::
 		SendAsyncResponse({
 			{ "isOk", true },
 		}, asyncId);
+		std::string error = std::to_string(result);
+		// OutputDebugStringA(error.c_str());
 	}
 }
 
@@ -408,12 +434,12 @@ void WrapperExtension::OnReceiveMessagesMessage( int nLocalChannel, double async
 	}
 	else
 	{
-		OutputDebugString(L"[SteamExt] Received messages\n");
+		// OutputDebugString(L"[SteamExt] Received messages\n");
 		// Go through messages and store them in the string array
 		std::string messagesJSONString = "{";
 		for (int i = 0; i < nMessages; i++)
 		{
-			OutputDebugString(L"[SteamExt] processing message\n");
+			// OutputDebugString(L"[SteamExt] processing message\n");
 			std::string iS = std::to_string(i); 
 			// Get message
 			SteamNetworkingMessage_t* message = pOutMessages[i];
@@ -426,10 +452,12 @@ void WrapperExtension::OnReceiveMessagesMessage( int nLocalChannel, double async
 			// Create string from message identityPeer
 			std::string messageIdentityPeerString = std::to_string(message->m_identityPeer.m_steamID64);
 			std::string timeReceivedString = std::to_string(message->m_usecTimeReceived);
+			// Create string for channel
+			std::string nChannelString = std::to_string(message->m_nChannel);
 			// store messageString and messageIdentityPeer in json object within an array
-			OutputDebugString(L"[SteamExt] Add to JSON\n");
+			// OutputDebugString(L"[SteamExt] Add to JSON\n");
 			// add message and identitPeer to messageJSONString object with key iS
-			messagesJSONString += "\"" + iS + "\":{\"message\":\"" + messageString + "\",\"identityPeer\":\"" + messageIdentityPeerString + "\",\"timeReceived\":\"" + timeReceivedString + "\"}";
+			messagesJSONString += "\"" + iS + "\":{\"message\":\"" + messageString + "\",\"identityPeer\":\"" + messageIdentityPeerString + "\",\"timeReceived\":\"" + timeReceivedString + "\",\"nChannel\":\"" + nChannelString + "\"}";
 			// if not last entry add comma, else add closing bracket
 			if (i != nMessages - 1)
 			{
@@ -439,18 +467,79 @@ void WrapperExtension::OnReceiveMessagesMessage( int nLocalChannel, double async
 			{
 				messagesJSONString += "}";
 			}
-			OutputDebugString(L"[SteamExt] Added to JSON\n");
+			// OutputDebugString(L"[SteamExt] Added to JSON\n");
 			message->Release();
 		}
 		// convert json object to string
-		OutputDebugString(L"[SteamExt] JSON string output\n");
-		OutputDebugStringA(messagesJSONString.c_str());
+		// OutputDebugString(L"[SteamExt] JSON string output\n");
+		// OutputDebugStringA(messagesJSONString.c_str());
 		// Send messages back to extension
 		SendAsyncResponse({
 			{ "isOk", true },
 			{ "messages", messagesJSONString },
 			{ "nMessages", nMessagesString },
 		}, asyncId);
+	}
+}
+
+
+// callback for OnSessionRequest
+void WrapperExtension::OnSessionRequest(SteamNetworkingMessagesSessionRequest_t* pCallback)
+{
+	OutputDebugString(L"[SteamExt] OnSessionRequest\n");
+	// Get session id
+	uint64 remoteSteamId = pCallback->m_identityRemote.m_steamID64;
+	// copy contents of pCallback->m_identityRemote to g_SteamNetworkingIdentities with key remoteSteamId
+	g_SteamNetworkingIdentities[remoteSteamId] = pCallback->m_identityRemote;
+	// Get session id as string
+	std::string remoteSteamIdString = std::to_string(remoteSteamId);
+	// Send Async Response based on result
+	if (remoteSteamId == 0)
+	{
+		// Error
+		SendWebMessage("session-request",{
+			{ "isOk", false },
+		});
+	}
+	else
+	{
+		// Success
+		SendWebMessage("session-request",{
+			{ "isOk", true },
+			{ "remoteSteamId", remoteSteamIdString },
+		});
+	}
+}
+
+// Create OnAcceptSessionWithUserMessage
+// Parameters CSteamID steamIDRemote
+void WrapperExtension::OnAcceptSessionWithUserMessage(CSteamID steamIdRemote, double asyncId)
+{
+	OutputDebugString(L"[SteamExt] OnAcceptSession\n");
+
+	// Accept session with user
+	// SteamAPICall_t AcceptSessionWithUser( CSteamID steamIDRemote );
+	// get uint64 from steamIdRemote
+	uint64 steamIdRemoteUint64 = steamIdRemote.ConvertToUint64();
+	// get SteamNetworkingIdentity from g_SteamNetworkingIdentities with key steamIdRemoteUint64
+	SteamNetworkingIdentity identityRemote = g_SteamNetworkingIdentities[steamIdRemoteUint64];
+	bool result = SteamNetworkingMessages()->AcceptSessionWithUser(identityRemote);
+	// Check for error and result depending on error
+	if (!result)
+	{
+		// Error
+		SendAsyncResponse({
+			{ "isOk", false }
+		}, asyncId);
+		OutputDebugString(L"[SteamExt] OnAcceptSession Fail\n");
+	}
+	else
+	{
+		// Success
+		SendAsyncResponse({
+			{ "isOk", true },
+		}, asyncId);
+		OutputDebugString(L"[SteamExt] OnAcceptSession Pass\n");
 	}
 }
 

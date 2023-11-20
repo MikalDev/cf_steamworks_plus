@@ -11,6 +11,8 @@ function getInstanceJs(parentClass, scriptInterface, addonTriggers, C3) {
         GetFriendPersonaName: "GetFriendPersonaName",
         SendMessageToUser: "SendMessageToUser",
         OnNetworkingMessage: "OnNetworkingMessage",
+        OnSessionRequest: "OnSessionRequest",
+        AcceptSessionWithUser: "AcceptSessionWithUser",
       }
 
       this.SetWrapperExtensionComponentId("cf-steam-plus");
@@ -29,6 +31,9 @@ function getInstanceJs(parentClass, scriptInterface, addonTriggers, C3) {
       // Corresponding wrapper extension is available
       if (this.IsWrapperExtensionAvailable()) console.log("Steamworks+ IsWrapperExtensionAvailable");
       this._StartTicking();
+      // Listen for session request events from the extension.
+		  this.AddWrapperExtensionMessageHandler("session-request", e => this._OnSessionRequestMessage(e));
+
     }
 
     Release() {
@@ -241,11 +246,49 @@ function getInstanceJs(parentClass, scriptInterface, addonTriggers, C3) {
         this._triggerTag = tag.toUpperCase();
         this.Trigger(C3.Plugins.cf_steamworks_plus.Cnds.OnRequestError);
       }
-      return result;
     }
 
     _EnableNetworking(enable) {
       this._enableNetworking = enable;
+      this.SendWrapperExtensionMessageAsync("enable-networking", [enable]);
+    }
+
+    _OnSessionRequest() {
+      return true
+    }
+
+    _OnSessionRequestMessage(e) {
+      const tag = this._Tag.OnSessionRequest;
+      const isOk = e["isOk"]
+      if (!isOk) {
+        this._steamError.set(this._Tag.OnSessionRequest.toUpperCase(), "error")
+        this._triggerTag = this._Tag.OnSessionRequest.toUpperCase();
+        this.Trigger(C3.Plugins.cf_steamworks_plus.Cnds.OnRequestError);
+        console.log("session request error", e)
+        return
+      }
+      console.log("session request", e)
+      this._steamResult.set(this._Tag.OnSessionRequest.toUpperCase(), JSON.stringify(e))
+      this._triggerTag = tag.toUpperCase();
+      this.Trigger(C3.Plugins.cf_steamworks_plus.Cnds.OnSessionRequest);
+    }
+
+    async _AcceptSessionWithUser(remoteSteamId) {
+      const tag = this._Tag.AcceptSessionWithUser;
+      const result = await this.SendWrapperExtensionMessageAsync("accept-session-from-user", [remoteSteamId]);
+      // Check result and respond
+      const isOk = result["isOk"];
+      if (isOk)
+      {
+        this._triggerTag = tag.toUpperCase();
+        this.Trigger(C3.Plugins.cf_steamworks_plus.Cnds.OnRequestResult);
+      }
+      else
+      {
+        this._steamError.set(tag.toUpperCase(), "error")
+        this._triggerTag = tag.toUpperCase();
+        this.Trigger(C3.Plugins.cf_steamworks_plus.Cnds.OnRequestError);
+      }
     }
 
     LoadFromJson(o) {
