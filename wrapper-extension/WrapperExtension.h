@@ -34,6 +34,7 @@ public:
     void OnGetFriendPersonaNameMessage(CSteamID steamIDFriend, double asyncId);
     void OnSendMessageToUserMessage(CSteamID steamID, const std::string &message, double asyncId);
     void OnReceiveMessagesMessage(int nLocalChannel, double asyncId);
+    void OnGetFriendsNameIdMessage(double asyncId);
     void OnSessionRequest(SteamNetworkingMessagesSessionRequest_t *pCallback);
     void OnDownloadLeaderboardEntriesMessage(int nStart, int nEnd, const std::string &, double asyncId);
 	void OnAcceptSessionWithUserMessage(CSteamID steamIDRemote, double asyncId);

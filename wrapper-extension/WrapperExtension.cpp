@@ -152,7 +152,9 @@ void WrapperExtension::HandleWebMessage(const std::string& messageId, const std:
 			m_bNetworkingMessagesEnabled = true;
 		}
 	}
-	else
+	else if (messageId == "get-friends-name-id") {
+		OnGetFriendsNameIdMessage(asyncId);
+	} else
 	{
 		OutputDebugString(L"[SteamExt] Unknown message ID\n");
 		SendAsyncResponse({
@@ -482,6 +484,37 @@ void WrapperExtension::OnReceiveMessagesMessage( int nLocalChannel, double async
 	}
 }
 
+void WrapperExtension::OnGetFriendsNameIdMessage(double asyncId)
+{
+	// Get friend count
+	int friendCount = SteamFriends()->GetFriendCount(k_EFriendFlagImmediate);
+	// Go through friends and store them in the string array
+	std::string friendsJSONString = "[";
+	for (int i = 0; i < friendCount; i++)
+	{
+		// Get friend
+		CSteamID friendSteamID = SteamFriends()->GetFriendByIndex(i, k_EFriendFlagImmediate);
+		// Get friend name
+		const char* friendPersonaName = SteamFriends()->GetFriendPersonaName(friendSteamID);
+		// Get std::string of friendPersonaName
+		std::string friendPersonaNameString = std::string(friendPersonaName);
+		// Get string of userId
+		std::string id = std::to_string(friendSteamID.ConvertToUint64());
+		std::string entry = "{ \"personaName\":\""+friendPersonaNameString+"\",\"steamId\":\"" + id +"\" }";
+		if (i != friendCount - 1)
+		{
+			entry += ",";
+		}
+		friendsJSONString += entry;
+	}
+	friendsJSONString += "]";
+	// Send Async Response based on result
+	// Success
+	SendAsyncResponse({
+		{ "isOk", true },
+		{ "friends", friendsJSONString },
+	}, asyncId);
+}
 
 // callback for OnSessionRequest
 void WrapperExtension::OnSessionRequest(SteamNetworkingMessagesSessionRequest_t* pCallback)

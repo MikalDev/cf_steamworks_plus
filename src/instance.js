@@ -13,6 +13,7 @@ function getInstanceJs(parentClass, scriptInterface, addonTriggers, C3) {
         OnNetworkingMessage: "OnNetworkingMessage",
         OnSessionRequest: "OnSessionRequest",
         AcceptSessionWithUser: "AcceptSessionWithUser",
+        GetFriendsNameId: "GetFriendsNameId",
       }
 
       this.SetWrapperExtensionComponentId("cf-steam-plus");
@@ -286,6 +287,26 @@ function getInstanceJs(parentClass, scriptInterface, addonTriggers, C3) {
       else
       {
         this._steamError.set(tag.toUpperCase(), "error")
+        this._triggerTag = tag.toUpperCase();
+        this.Trigger(C3.Plugins.cf_steamworks_plus.Cnds.OnRequestError);
+      }
+    }
+
+    async _GetFriendsNameId() {
+      const tag = this._Tag.GetFriendsNameId;
+      const result = await this.SendWrapperExtensionMessageAsync("get-friends-name-id");
+      // Check result and respond
+      const isOk = result["isOk"];
+      if (isOk)
+      {
+        this._steamResult.set(tag.toUpperCase(), result["friends"])
+        this._triggerTag = tag.toUpperCase();
+        // Call trigger
+        this.Trigger(C3.Plugins.cf_steamworks_plus.Cnds.OnRequestResult);
+      }
+      else
+      {
+        this._steamError.set(tag.toUpperCase(), `error:${tag}: no name found`)
         this._triggerTag = tag.toUpperCase();
         this.Trigger(C3.Plugins.cf_steamworks_plus.Cnds.OnRequestError);
       }

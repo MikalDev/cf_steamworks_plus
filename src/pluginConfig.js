@@ -3,7 +3,7 @@ module.exports = {
   addonType: "plugin",
   id: "cf_steamworks_plus",
   name: "Steamworks Plus",
-  version: "1.6.0",
+  version: "1.8.0",
   category: "platform-specific",
   author: "cf",
   website: "https://www.construct.net",
@@ -406,6 +406,21 @@ module.exports = {
       listName: "Accept session with user",
       displayText: "Accept session with user [i]{0}[/i]",
       description: "Accept session with user.",
+    },
+    // GetFriendsNameId
+    // Params: none
+    GetFriendsNameId: {
+      category: "friends",
+      forward: "_GetFriendsNameId",
+      autoScriptInterface: true,
+      highlight: false,
+      deprecated: false,
+      isAsync: true,
+      params: [
+      ],
+      listName: "Get friends name and id",
+      displayText: "Get friends name and id",
+      description: "Get friends names and ids.",
     },
   },
   Cnds: {
