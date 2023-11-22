@@ -118,7 +118,7 @@ function getInstanceJs(parentClass, scriptInterface, addonTriggers, C3) {
     }
 
     async _UploadLeaderboardScore(score) {
-      tag = this._Tag.UploadLeaderboardScore;
+      const tag = this._Tag.UploadLeaderboardScore;
       const result = await this.SendWrapperExtensionMessageAsync("upload-leaderboard-score", [score]);
       // Check result and respond
       const isOk = result["isOk"];

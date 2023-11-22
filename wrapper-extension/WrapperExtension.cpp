@@ -230,7 +230,7 @@ void WrapperExtension::OnFindLeaderboard(LeaderboardFindResult_t* pCallback, boo
 void WrapperExtension::OnUploadLeaderboardScoreMessage(int score, double asyncId)
 {
 	// Upload score to leaderboard for steamworks using the global leaderboard handle
-	SteamAPICall_t hSteamAPICall = SteamUserStats()->UploadLeaderboardScore(g_hSteamLeaderboard, k_ELeaderboardUploadScoreMethodForceUpdate, score, NULL, 0);
+	SteamAPICall_t hSteamAPICall = SteamUserStats()->UploadLeaderboardScore(g_hSteamLeaderboard, k_ELeaderboardUploadScoreMethodKeepBest, score, NULL, 0);
 	// Check for error and result depending on error
 	if (hSteamAPICall == 0)
 	{
@@ -346,9 +346,6 @@ void WrapperExtension::OnGetFriendPersonaNameMessage( CSteamID steamIDFriend, do
 	// steamIDFriendPN to string
 	std::string steamIDFriendPNString = SteamIDToString(steamIDFriendPN);
 	// cocatenate steamIDFriendPNString with friendPersonaName
-	std::string debugMessage = "Get Friend Persona Name: ";
-	debugMessage += steamIDFriendPNString + ":";
-	debugMessage += friendPersonaName;
 
 	if (friendPersonaName == nullptr || strlen(friendPersonaName) == 0 || strcmp(friendPersonaName, "[unknown]") == 0)
 	{
@@ -362,8 +359,7 @@ void WrapperExtension::OnGetFriendPersonaNameMessage( CSteamID steamIDFriend, do
 		// Success
 		SendAsyncResponse({
 			{ "isOk", true },
-//			{ "friendPersonaName", friendPersonaName },
-			{ "friendPersonaName", debugMessage },
+			{ "friendPersonaName", friendPersonaName },
 		}, asyncId);
 	}
 }
