@@ -12,10 +12,14 @@ public:
 	void Init();
     void OnEnableNetorkingMessages();
     void Release();
-    void OnMainWindowCreated(HWND hWnd_);
+#ifdef _WIN32
+	void OnMainWindowCreated(HWND hWnd_);
+#else
+	void OnMainWindowCreated();
+#endif
 
 	// Web messaging methods
-	void OnWebMessage(LPCSTR messageId, size_t paramCount, const ExtensionParameterPOD* paramArr, double asyncId);
+	void OnWebMessage(const char* messageId, size_t paramCount, const ExtensionParameterPOD* paramArr, double asyncId);
 	void HandleWebMessage(const std::string& messageId, const std::vector<ExtensionParameter>& params, double asyncId);
 
     CSteamID StringToSteamID(const std::string &steamIDString);
@@ -50,7 +54,6 @@ private:
 
 protected:
 	IApplication* iApplication;
-	HWND hWndMain;
 	bool didSteamInitOk;
 
 	std::unique_ptr<SteamCallbacks> steamCallbacks;

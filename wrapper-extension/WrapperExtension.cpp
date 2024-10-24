@@ -1,5 +1,11 @@
 #include "pch.h"
 #include "WrapperExtension.h"
+#include "json.hpp"
+
+#ifdef __linux__
+#include <stdlib.h>		// for setenv()
+#endif
+
 #include <unordered_map>
 
 #include <sstream>
@@ -13,7 +19,7 @@ WrapperExtension* g_Extension = nullptr;
 
 // Main DLL export function to initialize extension.
 extern "C" {
-	__declspec(dllexport) IExtension* WrapperExtInit(IApplication* iApplication)
+	DLLEXPORT IExtension* WrapperExtInit(IApplication* iApplication)
 	{
 		g_Extension = new WrapperExtension(iApplication);
 		return g_Extension;
@@ -22,7 +28,7 @@ extern "C" {
 
 // Helper method to call HandleWebMessage() with more useful types, as OnWebMessage() must deal with
 // plain-old-data types for crossing a DLL boundary.
-void WrapperExtension::OnWebMessage(LPCSTR messageId_, size_t paramCount, const ExtensionParameterPOD* paramArr, double asyncId)
+void WrapperExtension::OnWebMessage(const char* messageId_, size_t paramCount, const ExtensionParameterPOD* paramArr, double asyncId)
 {
 	HandleWebMessage(messageId_, UnpackExtensionParameterArray(paramCount, paramArr), asyncId);
 }
@@ -55,10 +61,9 @@ static std::unordered_map<uint64, SteamNetworkingIdentity> g_SteamNetworkingIden
 // WrapperExtension
 WrapperExtension::WrapperExtension(IApplication* iApplication_)
 	: iApplication(iApplication_),
-	  hWndMain(NULL),
 	  didSteamInitOk(false)
 {
-	OutputDebugString(L"[SteamExt] Loaded extension\n");
+	DebugLog("[SteamExt] Loaded extension\n");
 
 	// Tell the host application the SDK version used. Don't change this.
 	iApplication->SetSdkVersion(WRAPPER_EXT_SDK_VERSION);
@@ -75,7 +80,7 @@ void WrapperExtension::Init()
 
 void WrapperExtension::Release()
 {
-	OutputDebugString(L"[SteamExt] Releasing extension\n");
+	DebugLog("[SteamExt] Releasing extension\n");
 
 	if (didSteamInitOk)
 	{
@@ -87,15 +92,21 @@ void WrapperExtension::Release()
 	}
 }
 
+#ifdef _WIN32
 void WrapperExtension::OnMainWindowCreated(HWND hWnd)
 {
-	hWndMain = hWnd;
 }
+#else
+void WrapperExtension::OnMainWindowCreated()
+{
+}
+#endif
 
 // For handling a message sent from JavaScript.
 // This method mostly just unpacks parameters and calls a dedicated method to handle the message.
 void WrapperExtension::HandleWebMessage(const std::string& messageId, const std::vector<ExtensionParameter>& params, double asyncId)
 {
+	DebugLog(messageId);
 	if (messageId == "run-callbacks")
 	{
 		SteamAPI_RunCallbacks();
@@ -156,7 +167,7 @@ void WrapperExtension::HandleWebMessage(const std::string& messageId, const std:
 		OnGetFriendsNameIdMessage(asyncId);
 	} else
 	{
-		OutputDebugString(L"[SteamExt] Unknown message ID\n");
+		DebugLog("[SteamExt] Unknown message ID\n");
 		SendAsyncResponse({
 		{ "isOk", false },
 		{ "error", "Unknown message ID" },
@@ -278,32 +289,20 @@ void WrapperExtension::OnLeaderboardScoresDownloaded(LeaderboardScoresDownloaded
 	// Store length in global
 	int entryCount = pCallback->m_cEntryCount;
 	// Go through entries and store them in an std::unordered_map with key rank-id and global rank score-id and score
-	std::string scoresJSON = "[";
+	nlohmann::json scoresJSON = nlohmann::json::array();
 	for (int i = 0; i < entryCount; i++)
 	{
 		LeaderboardEntry_t leaderboardEntry;
 		SteamUserStats()->GetDownloadedLeaderboardEntry(SteamLeaderboardEntries, i, &leaderboardEntry, NULL, 0);
-		// Get string of userId
-		std::string id = std::to_string(leaderboardEntry.m_steamIDUser.ConvertToUint64());
-		// Create a string with "rank"+id
-		std::string rankId = "rank-" + id;
-		// Create a string with "score"+id
-		std::string scoreId = "score-" + id;
-		// Use rankId to store rank in entries
-		// entries.insert(std::make_pair(rankId, ExtensionParameter(float(leaderboardEntry.m_nGlobalRank))));
-		// Use scoreId to store score in entries
-		// entries.insert(std::make_pair(scoreId, ExtensionParameter(float(leaderboardEntry.m_nScore))));
-		std::string rank = std::to_string(leaderboardEntry.m_nGlobalRank);
-		std::string score = std::to_string(leaderboardEntry.m_nScore);
-		std::string name = std::to_string(leaderboardEntry.m_steamIDUser.ConvertToUint64());
-		std::string entry = "{ \"rank\":"+rank+",\"score\":" + score + ",\"steamIDUser\":" + name + " }";
-		if (i != entryCount - 1)
-		{
-			entry += ",";
-		}
-		scoresJSON += entry;
+		
+		nlohmann::json entry;
+		entry["rank"] = leaderboardEntry.m_nGlobalRank;
+		entry["score"] = leaderboardEntry.m_nScore;
+		entry["steamIDUser"] = leaderboardEntry.m_steamIDUser.ConvertToUint64();
+		
+		scoresJSON.push_back(entry);
 	}
-	scoresJSON += "]";
+	std::string scoresJSONString = scoresJSON.dump();
 
 	// Send Async Response based on result
 	if (entryCount == 0)
@@ -318,7 +317,7 @@ void WrapperExtension::OnLeaderboardScoresDownloaded(LeaderboardScoresDownloaded
 		// Success
 		SendAsyncResponse({
 			{ "isOk", true },
-			{ "scores", scoresJSON },
+			{ "scores", scoresJSONString },
 		} 
 			, asyncId);
 	}
@@ -432,13 +431,12 @@ void WrapperExtension::OnReceiveMessagesMessage( int nLocalChannel, double async
 	}
 	else
 	{
-		// OutputDebugString(L"[SteamExt] Received messages\n");
+		// DebugLog("[SteamExt] Received messages\n");
 		// Go through messages and store them in the string array
-		std::string messagesJSONString = "{";
+		nlohmann::json messagesJSON;
 		for (int i = 0; i < nMessages; i++)
 		{
-			// OutputDebugString(L"[SteamExt] processing message\n");
-			std::string iS = std::to_string(i); 
+			// DebugLog("[SteamExt] processing message\n");
 			// Get message
 			SteamNetworkingMessage_t* message = pOutMessages[i];
 			// Get message data
@@ -447,29 +445,23 @@ void WrapperExtension::OnReceiveMessagesMessage( int nLocalChannel, double async
 			int messageDataLength = message->m_cbSize;
 			// Create string using message data and message data length
 			std::string messageString = std::string(messageData, messageDataLength);
-			// Create string from message identityPeer
-			std::string messageIdentityPeerString = std::to_string(message->m_identityPeer.m_steamID64);
-			std::string timeReceivedString = std::to_string(message->m_usecTimeReceived);
-			// Create string for channel
-			std::string nChannelString = std::to_string(message->m_nChannel);
-			// store messageString and messageIdentityPeer in json object within an array
-			// OutputDebugString(L"[SteamExt] Add to JSON\n");
-			// add message and identitPeer to messageJSONString object with key iS
-			messagesJSONString += "\"" + iS + "\":{\"message\":\"" + messageString + "\",\"identityPeer\":\"" + messageIdentityPeerString + "\",\"timeReceived\":\"" + timeReceivedString + "\",\"nChannel\":\"" + nChannelString + "\"}";
-			// if not last entry add comma, else add closing bracket
-			if (i != nMessages - 1)
-			{
-				messagesJSONString += ",";
-			}
-			else
-			{
-				messagesJSONString += "}";
-			}
-			// OutputDebugString(L"[SteamExt] Added to JSON\n");
+
+			// Create JSON object for this message
+			nlohmann::json messageJSON;
+			messageJSON["message"] = messageString;
+			messageJSON["identityPeer"] = std::to_string(message->m_identityPeer.m_steamID64);
+			messageJSON["timeReceived"] = std::to_string(message->m_usecTimeReceived);
+			messageJSON["nChannel"] = std::to_string(message->m_nChannel);
+
+			// Add message JSON to messages JSON
+			messagesJSON[std::to_string(i)] = messageJSON;
+
+			// DebugLog("[SteamExt] Added to JSON\n");
 			message->Release();
 		}
+		std::string messagesJSONString = messagesJSON.dump();
 		// convert json object to string
-		// OutputDebugString(L"[SteamExt] JSON string output\n");
+		// DebugLog("[SteamExt] JSON string output\n");
 		// OutputDebugStringA(messagesJSONString.c_str());
 		// Send messages back to extension
 		SendAsyncResponse({
@@ -515,7 +507,7 @@ void WrapperExtension::OnGetFriendsNameIdMessage(double asyncId)
 // callback for OnSessionRequest
 void WrapperExtension::OnSessionRequest(SteamNetworkingMessagesSessionRequest_t* pCallback)
 {
-	OutputDebugString(L"[SteamExt] OnSessionRequest\n");
+	DebugLog("[SteamExt] OnSessionRequest\n");
 	// Get session id
 	uint64 remoteSteamId = pCallback->m_identityRemote.m_steamID64;
 	// copy contents of pCallback->m_identityRemote to g_SteamNetworkingIdentities with key remoteSteamId
@@ -544,7 +536,7 @@ void WrapperExtension::OnSessionRequest(SteamNetworkingMessagesSessionRequest_t*
 // Parameters CSteamID steamIDRemote
 void WrapperExtension::OnAcceptSessionWithUserMessage(CSteamID steamIdRemote, double asyncId)
 {
-	OutputDebugString(L"[SteamExt] OnAcceptSession\n");
+	DebugLog("[SteamExt] OnAcceptSession\n");
 
 	// Accept session with user
 	// SteamAPICall_t AcceptSessionWithUser( CSteamID steamIDRemote );
@@ -560,7 +552,7 @@ void WrapperExtension::OnAcceptSessionWithUserMessage(CSteamID steamIdRemote, do
 		SendAsyncResponse({
 			{ "isOk", false }
 		}, asyncId);
-		OutputDebugString(L"[SteamExt] OnAcceptSession Fail\n");
+		DebugLog("[SteamExt] OnAcceptSession Fail\n");
 	}
 	else
 	{
@@ -568,7 +560,7 @@ void WrapperExtension::OnAcceptSessionWithUserMessage(CSteamID steamIdRemote, do
 		SendAsyncResponse({
 			{ "isOk", true },
 		}, asyncId);
-		OutputDebugString(L"[SteamExt] OnAcceptSession Pass\n");
+		DebugLog("[SteamExt] OnAcceptSession Pass\n");
 	}
 }
 

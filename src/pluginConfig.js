@@ -36,6 +36,11 @@ module.exports = {
       type: "wrapper-extension",
 			platform: "windows-x64"
     },
+    {
+      filename: "Steam_plus_x64.ext.so", // no need to include "c3runtime/" prefix
+      type: "wrapper-extension",
+			platform: "linux-x64"
+    },
   ],
   info: {
     // world only

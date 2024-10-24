@@ -1,3 +1,4 @@
+/*
 #pragma once
 
 // Windows header files
@@ -33,3 +34,4 @@
 
 // SDK utilities
 #include "Utils.h"
+*/

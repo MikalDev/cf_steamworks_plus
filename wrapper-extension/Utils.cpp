@@ -1,5 +1,12 @@
 
 #include "pch.h"
+#include "Utils.h"
+
+#ifdef __linux__
+#include <iostream>		// std::cout (for DebugLog)
+#endif
+
+#ifdef _WIN32
 
 std::wstring Utf8ToWide(const std::string& utf8string)
 {
@@ -48,6 +55,8 @@ std::string WideToUtf8(const std::wstring& widestring)
 	// Return converted string
 	return buffer;
 }
+#endif // _WIN32
+
 
 std::vector<ExtensionParameter> UnpackExtensionParameterArray(size_t paramCount, const ExtensionParameterPOD* paramArr)
 {
@@ -99,6 +108,49 @@ std::vector<NamedExtensionParameterPOD> PackNamedExtensionParameters(const std::
 		}
 
 		ret.push_back(nep);
+	}
+
+	return ret;
+}
+
+void DebugLog(const std::string& message)
+{
+	// On Windows, call OutputDebugString(). On Linux just log to the terminal.
+#ifdef _WIN32
+	std::wstring messageW = Utf8ToWide(message);
+	OutputDebugString(messageW.c_str());
+#else
+	std::cout << message;
+#endif
+}
+
+
+std::vector<std::string> SplitString(const std::string& str, const std::string& sep)
+{
+	std::vector<std::string> ret;
+	size_t next = 0;
+	size_t last = 0;
+
+	while ((next = str.find(sep, last)) != std::string::npos)
+	{
+		ret.push_back(str.substr(last, next - last));
+		last = next + sep.length();
+	}
+
+	ret.push_back(str.substr(last));
+	return ret;
+}
+
+std::string JoinStrings(const std::vector<std::string>& vec, const std::string& sep)
+{
+	std::string ret;
+
+	for (auto i = vec.begin(), end = vec.end(); i != end; ++i)
+	{
+		ret += *i;
+
+		if (i + 1 != end)
+			ret += sep;
 	}
 
 	return ret;

@@ -1,0 +1,8 @@
+{
+    "name": "wrapper-extension",
+    "version-string": "1.1.0",
+    "dependencies": [
+      "nlohmann-json",
+      "spdlog"
+    ]
+}

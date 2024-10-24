@@ -37,9 +37,50 @@ node_modules/
 
 *.c3addon
 *.vcxproj.user
-/wrapper-extension/steamworks-sdk/
-/wrapper-extension/x64/
-/wrapper-extension/Win32/
-/construct-plugin/*.exp
-/construct-plugin/*.lib
-/construct-plugin/*.pdb
+wrapper-extension/steamworks-sdk/
+wrapper-extension/x64/
+wrapper-extension/SteamExt/x64/
+wrapper-extension/Win32/
+construct-plugin/*.exp
+construct-plugin/*.lib
+construct-plugin/*.pdb
+
+# Ignore CMake build directories
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Ignore build directories
+/build/
+/out/
+
+# Ignore CMake generated files
+*.cmake
+*.cbp
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.user
+*.ninja
+*.ninja_deps
+*.ninja_log
+*.dir/
+
+# Ignore CMake generated executables and libraries
+*.exe
+*.dll
+*.lib
+*.a
+*.so
+*.dylib
+*.app
+
+# Ignore vcpkg installed libraries and build directories
+vcpkg_installed/
+vcpkg/buildtrees/
+vcpkg/downloads/
+vcpkg/packages/
+vcpkg/ports/.*/build
+
+
