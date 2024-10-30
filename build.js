@@ -416,6 +416,7 @@ if (config.icon) {
 }
 
 fs.copyFileSync("./construct-plugin/Steam_x64.ext.dll", "./src/Steam_plus_x64.ext.dll");
+fs.copyFileSync("./construct-plugin/Steam_x64.ext.so", "./src/Steam_plus_x64.ext.so");
 
 function getEditorPluginInfoFromConfig(config) {
   const editorPluginInfo = {
