@@ -3,7 +3,7 @@ module.exports = {
   addonType: "plugin",
   id: "cf_steamworks_plus",
   name: "Steamworks Plus",
-  version: "1.8.3",
+  version: "1.9.0",
   category: "platform-specific",
   author: "cf",
   website: "https://www.construct.net",
