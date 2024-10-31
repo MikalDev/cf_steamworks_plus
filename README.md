@@ -2,6 +2,13 @@
 - Open source repo for the Construct 3 Steam plus addon
 - To just get the addon go to the official C3 addon site or https://github.com/MikalDev/cf_steamworks_plus/releases
 
+Linux build notes:
+- Install node js
+- Install npm
+- Install cmake
+- Use elfPatch to fix the *.so for RPATH ( patchelf --set-rpath '$ORIGIN' )
+- Use ldd to check the *.so dependencies
+
 To build the addon and dll (also see #Build below for details on other tools neede)
 
 ```

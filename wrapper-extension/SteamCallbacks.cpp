@@ -14,6 +14,6 @@ SteamCallbacks::SteamCallbacks(WrapperExtension& extension_)
 void SteamCallbacks::OnSessionRequest(SteamNetworkingMessagesSessionRequest_t* pCallback)
 {
 	// output debug
-	OutputDebugString(L"SteamCallbacks::OnSessionRequest\n");
+	DebugLog("SteamCallbacks::OnSessionRequest\n");
 	extension.OnSessionRequest(pCallback);
 }

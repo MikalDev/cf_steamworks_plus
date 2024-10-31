@@ -22,6 +22,7 @@ extern "C" {
 	DLLEXPORT IExtension* WrapperExtInit(IApplication* iApplication)
 	{
 		g_Extension = new WrapperExtension(iApplication);
+		DebugLog("[SteamExt] WrapperExtInit\n");
 		return g_Extension;
 	}
 }
@@ -30,11 +31,16 @@ extern "C" {
 // plain-old-data types for crossing a DLL boundary.
 void WrapperExtension::OnWebMessage(const char* messageId_, size_t paramCount, const ExtensionParameterPOD* paramArr, double asyncId)
 {
+	DebugLog("[SteamExt] OnWebMessage\n");
+	DebugLog(messageId_);
 	HandleWebMessage(messageId_, UnpackExtensionParameterArray(paramCount, paramArr), asyncId);
 }
 
 void WrapperExtension::SendWebMessage(const std::string& messageId, const std::map<std::string, ExtensionParameter>& params, double asyncId)
 {
+	DebugLog("[SteamExt] SendWebMessage\n");
+	DebugLog(messageId.c_str());
+	DebugLog("\nSendWebMessage\n");
 	std::vector<NamedExtensionParameterPOD> paramArr = PackNamedExtensionParameters(params);
 	iApplication->SendWebMessage(messageId.c_str(), paramArr.size(), paramArr.empty() ? nullptr : paramArr.data(), asyncId);
 }
@@ -43,6 +49,18 @@ void WrapperExtension::SendWebMessage(const std::string& messageId, const std::m
 // In this case the message ID is not used, so this just calls SendWebMessage() with an empty message ID.
 void WrapperExtension::SendAsyncResponse(const std::map<std::string, ExtensionParameter>& params, double asyncId)
 {
+	DebugLog("[SteamExt] SendAsyncResponse\n");
+	DebugLog(std::to_string(asyncId).c_str());
+	DebugLog("\nSendWebMessage\n");
+	// Convert map to string for debug logging
+	std::stringstream ss;
+	ss << "Params: {";
+	for (const auto& pair : params) {
+		ss << "\"" << pair.first << "\": " << pair.second.GetString() << ", ";
+	}
+	ss << "}";
+	DebugLog(ss.str().c_str());
+	DebugLog("\n");
 	SendWebMessage("", params, asyncId);
 }
 
@@ -183,14 +201,14 @@ CSteamID WrapperExtension::StringToSteamID(const std::string& steamIDString) {
         // Include the exception message in your error handling
         std::string error_message = "Invalid argument in converting Steam ID string: ";
         error_message += ia.what(); // ia.what() returns the error message associated with the exception
-		OutputDebugStringA(error_message.c_str());
+		DebugLog(error_message.c_str());
 		uint64 zeroID = 0;
 	    return CSteamID(zeroID);		
     } catch (const std::out_of_range& oor) {
         // Include the exception message in your error handling
         std::string error_message = "Steam ID string is out of range: ";
         error_message += oor.what(); // oor.what() returns the error message associated with the exception
-		OutputDebugStringA(error_message.c_str());
+		DebugLog(error_message.c_str());
 		uint64 zeroID = 0;
 	    return CSteamID(zeroID);
     }
@@ -390,7 +408,7 @@ void WrapperExtension::OnSendMessageToUserMessage( CSteamID steamID, const std::
 			{ "isOk", false},
 			{ "error", error},
 		}, asyncId);
-		OutputDebugStringA(error.c_str());
+		DebugLog(error.c_str());
 	}
 	else
 	{
