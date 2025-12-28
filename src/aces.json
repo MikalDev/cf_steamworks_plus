@@ -1,0 +1,255 @@
+{
+  "leaderboard": {
+    "conditions": [],
+    "actions": [
+      {
+        "id": "FindLeaderboard",
+        "scriptName": "FindLeaderboard",
+        "highlight": true,
+        "deprecated": false,
+        "isAsync": true,
+        "params": [
+          {
+            "id": "name",
+            "type": "string",
+            "value": ""
+          }
+        ]
+      },
+      {
+        "id": "UpdloadLeaderboardScore",
+        "scriptName": "UpdloadLeaderboardScore",
+        "highlight": false,
+        "deprecated": false,
+        "isAsync": true,
+        "params": [
+          {
+            "id": "score",
+            "type": "number",
+            "value": 0
+          }
+        ]
+      },
+      {
+        "id": "DownloadLeaderboardScores",
+        "scriptName": "DownloadLeaderboardScores",
+        "highlight": false,
+        "deprecated": false,
+        "isAsync": true,
+        "params": [
+          {
+            "id": "start",
+            "type": "number",
+            "value": 0
+          },
+          {
+            "id": "end",
+            "type": "number",
+            "value": 0
+          },
+          {
+            "id": "mode",
+            "type": "combo",
+            "value": "global",
+            "items": [
+              "global",
+              "global-around-user",
+              "friends"
+            ]
+          }
+        ]
+      }
+    ],
+    "expressions": []
+  },
+  "general": {
+    "conditions": [
+      {
+        "id": "OnRequestResult",
+        "scriptName": "OnRequestResult",
+        "highlight": false,
+        "deprecated": false,
+        "isTrigger": true,
+        "isFakeTrigger": false,
+        "isStatic": false,
+        "isLooping": false,
+        "isInvertible": true,
+        "isCompatibleWithTriggers": false,
+        "params": [
+          {
+            "id": "tag",
+            "type": "string",
+            "value": ""
+          }
+        ]
+      },
+      {
+        "id": "OnRequestError",
+        "scriptName": "OnRequestError",
+        "highlight": false,
+        "deprecated": false,
+        "isTrigger": true,
+        "isFakeTrigger": false,
+        "isStatic": false,
+        "isLooping": false,
+        "isInvertible": true,
+        "isCompatibleWithTriggers": false,
+        "params": [
+          {
+            "id": "tag",
+            "type": "string",
+            "value": ""
+          }
+        ]
+      }
+    ],
+    "actions": [],
+    "expressions": [
+      {
+        "id": "RequestData",
+        "scriptName": "RequestData",
+        "expressionName": "RequestData",
+        "highlight": false,
+        "deprecated": false,
+        "returnType": "any",
+        "isVariadicParameters": false,
+        "params": [
+          {
+            "id": "tag",
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "id": "RequestError",
+        "scriptName": "RequestError",
+        "expressionName": "RequestError",
+        "highlight": false,
+        "deprecated": false,
+        "returnType": "any",
+        "isVariadicParameters": false,
+        "params": [
+          {
+            "id": "tag",
+            "type": "string"
+          }
+        ]
+      }
+    ]
+  },
+  "app": {
+    "conditions": [],
+    "actions": [
+      {
+        "id": "IsDlcInstalled",
+        "scriptName": "IsDlcInstalled",
+        "highlight": false,
+        "deprecated": false,
+        "isAsync": true,
+        "params": [
+          {
+            "id": "appId",
+            "type": "number",
+            "value": 0
+          }
+        ]
+      }
+    ],
+    "expressions": []
+  },
+  "friends": {
+    "conditions": [],
+    "actions": [
+      {
+        "id": "GetFriendPersonaName",
+        "scriptName": "GetFriendPersonaName",
+        "highlight": false,
+        "deprecated": false,
+        "isAsync": true,
+        "params": [
+          {
+            "id": "friendId",
+            "type": "string",
+            "value": ""
+          }
+        ]
+      },
+      {
+        "id": "GetFriendsNameId",
+        "scriptName": "GetFriendsNameId",
+        "highlight": false,
+        "deprecated": false,
+        "isAsync": true,
+        "params": []
+      }
+    ],
+    "expressions": []
+  },
+  "networkingMessages": {
+    "conditions": [
+      {
+        "id": "OnSessionRequest",
+        "scriptName": "OnSessionRequest",
+        "highlight": false,
+        "deprecated": false,
+        "isTrigger": true,
+        "isFakeTrigger": false,
+        "isStatic": false,
+        "isLooping": false,
+        "isInvertible": true,
+        "isCompatibleWithTriggers": false,
+        "params": []
+      }
+    ],
+    "actions": [
+      {
+        "id": "SendMessageToUser",
+        "scriptName": "SendMessageToUser",
+        "highlight": false,
+        "deprecated": false,
+        "isAsync": true,
+        "params": [
+          {
+            "id": "identityRemote",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "id": "message",
+            "type": "string",
+            "value": ""
+          }
+        ]
+      },
+      {
+        "id": "EnableNetworking",
+        "scriptName": "EnableNetworking",
+        "highlight": false,
+        "deprecated": false,
+        "isAsync": false,
+        "params": [
+          {
+            "id": "enable",
+            "type": "boolean",
+            "value": true
+          }
+        ]
+      },
+      {
+        "id": "AcceptSessionWithUser",
+        "scriptName": "AcceptSessionWithUser",
+        "highlight": false,
+        "deprecated": false,
+        "isAsync": true,
+        "params": [
+          {
+            "id": "remoteSteamId",
+            "type": "string",
+            "value": ""
+          }
+        ]
+      }
+    ],
+    "expressions": []
+  }
+}

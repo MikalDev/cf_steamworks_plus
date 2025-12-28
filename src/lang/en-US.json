@@ -1,0 +1,186 @@
+{
+  "languageTag": "en-US",
+  "fileDescription": "Strings for cf_steamworks_plus.",
+  "text": {
+    "plugins": {
+      "cf_steamworks_plus": {
+        "name": "Steamworks Plus",
+        "description": "Steamworks companion addon",
+        "help-url": "https://www.construct.net",
+        "aceCategories": {
+          "leaderboard": "Leaderboard",
+          "general": "General",
+          "app": "App",
+          "friends": "Friends",
+          "networkingMessages": "Networking Messages"
+        },
+        "properties": {},
+        "actions": {
+          "FindLeaderboard": {
+            "list-name": "Set leaderboard",
+            "display-text": "Set leaderboard [i]{0}[/i]",
+            "description": "Set leaderboard and set as current leaderboard.",
+            "params": {
+              "name": {
+                "name": "Name",
+                "desc": "Name of the leaderboard."
+              }
+            }
+          },
+          "UpdloadLeaderboardScore": {
+            "list-name": "Upload current leaderboard score",
+            "display-text": "Upload current leaderboard score to [i]{0}[/i]",
+            "description": "Upload current leaderboard score.",
+            "params": {
+              "score": {
+                "name": "Score",
+                "desc": "Score to upload."
+              }
+            }
+          },
+          "DownloadLeaderboardScores": {
+            "list-name": "Download leaderboard scores",
+            "display-text": "Download leaderboard scores from [i]{0}[/i] to [i]{1}[/i], mode [i]{2}[/i]",
+            "description": "Download leaderboard scores.",
+            "params": {
+              "start": {
+                "name": "Start",
+                "desc": "Start position."
+              },
+              "end": {
+                "name": "End",
+                "desc": "End position."
+              },
+              "mode": {
+                "name": "Mode",
+                "desc": "Mode.",
+                "items": {
+                  "global": "Global",
+                  "global-around-user": "GlobalAroundUser",
+                  "friends": "Friends"
+                }
+              }
+            }
+          },
+          "IsDlcInstalled": {
+            "list-name": "Is DLC installed",
+            "display-text": "Is DLC [i]{0}[/i] installed",
+            "description": "Is DLC installed.",
+            "params": {
+              "appId": {
+                "name": "AppId",
+                "desc": "AppId of the DLC."
+              }
+            }
+          },
+          "GetFriendPersonaName": {
+            "list-name": "Get friend persona name",
+            "display-text": "Get friend persona name [i]{0}[/i]",
+            "description": "Get friend persona name.",
+            "params": {
+              "friendId": {
+                "name": "FriendId",
+                "desc": "FriendId."
+              }
+            }
+          },
+          "SendMessageToUser": {
+            "list-name": "Send message to user",
+            "display-text": "Send message [i]{1}[/i] to user [i]{0}[/i]",
+            "description": "Send message to user.",
+            "params": {
+              "identityRemote": {
+                "name": "Identity remote",
+                "desc": "Identity remote. (SteamId)"
+              },
+              "message": {
+                "name": "Message",
+                "desc": "Message."
+              }
+            }
+          },
+          "EnableNetworking": {
+            "list-name": "Enable networking",
+            "display-text": "Enable networking [i]{0}[/i]",
+            "description": "Enable networking.",
+            "params": {
+              "enable": {
+                "name": "Enable",
+                "desc": "Enable networking."
+              }
+            }
+          },
+          "AcceptSessionWithUser": {
+            "list-name": "Accept session with user",
+            "display-text": "Accept session with user [i]{0}[/i]",
+            "description": "Accept session with user.",
+            "params": {
+              "remoteSteamId": {
+                "name": "Remote SteamId",
+                "desc": "Remote SteamId."
+              }
+            }
+          },
+          "GetFriendsNameId": {
+            "list-name": "Get friends name and id",
+            "display-text": "Get friends name and id",
+            "description": "Get friends names and ids.",
+            "params": {}
+          }
+        },
+        "conditions": {
+          "OnRequestResult": {
+            "list-name": "OnRequestResult",
+            "display-text": "On request result [i]{0}[/i]",
+            "description": "On result of tagged request",
+            "params": {
+              "tag": {
+                "name": "Tag",
+                "desc": "Tag of the request"
+              }
+            }
+          },
+          "OnRequestError": {
+            "list-name": "OnRequestError",
+            "display-text": "On request error [i]{0}[/i]",
+            "description": "On error of tagged request",
+            "params": {
+              "tag": {
+                "name": "Tag",
+                "desc": "Tag of the request error"
+              }
+            }
+          },
+          "OnSessionRequest": {
+            "list-name": "On session request",
+            "display-text": "On session request",
+            "description": "On session request",
+            "params": {}
+          }
+        },
+        "expressions": {
+          "RequestData": {
+            "translated-name": "RequestData",
+            "description": "Return the data from the last request with the tag as JSON string.",
+            "params": {
+              "tag": {
+                "name": "Tag",
+                "desc": "Tag of the request"
+              }
+            }
+          },
+          "RequestError": {
+            "translated-name": "RequestError",
+            "description": "Return the error from the last request with the tag as JSON string.",
+            "params": {
+              "tag": {
+                "name": "Tag",
+                "desc": "Tag of the request error"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

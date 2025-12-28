@@ -1,6 +1,40 @@
 const SDK = self.SDK;
 
-//<-- PLUGIN_INFO -->
+const PLUGIN_INFO = {
+    ...{
+  "id": "cf_steamworks_plus",
+  "version": "2.0.0",
+  "category": "platform-specific",
+  "author": "cf",
+  "addonType": "plugin",
+  "info": {
+    "defaultImageUrl": null,
+    "Set": {
+      "IsSingleGlobal": true,
+      "CanBeBundled": true,
+      "IsDeprecated": false,
+      "GooglePlayServicesEnabled": false
+    }
+  },
+  "domSideScripts": [],
+  "fileDependencies": [
+    {
+      "filename": "Steam_plus_x64.ext.dll",
+      "type": "wrapper-extension",
+      "platform": "windows-x64"
+    },
+    {
+      "filename": "Steam_plus_x64.ext.so",
+      "type": "wrapper-extension",
+      "platform": "linux-x64"
+    }
+  ],
+  "type": "object"
+},
+    properties: [
+      
+    ],
+  };
 
 let app = null;
 
